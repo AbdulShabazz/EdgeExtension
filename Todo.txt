@@ -1,0 +1,17 @@
+TODO: 
+
+1.0 Acquire video encoding settings + video description from Host page
+1.1 Strip non-supported english text
+1.2 Enter video description text on translation site and compare input to desired english output.
+  If the two match, then no translation is required; otherwise, append the translated text onto the description,
+  prepended by the language designation
+1.3 Generate the video on the Host site
+1.4 Record the video title [optional]
+1.5 Add video to Favorites
+1.6 Download the video
+1.7 Close the tab or page
+2.0 Open the Video Hosting site (e.g., Youtube), specifically the Uploads page
+2.1 Select target video
+2.2 Complete video title, description, playlist, and visibility fields
+2.3 Submit and upload the video
+3.0 Return focus to the next right-most tab
