@@ -14,4 +14,4 @@ TODO:
 2.1 Select target video
 2.2 Complete video title, description, playlist, and visibility fields
 2.3 Submit and upload the video
-3.0 Return focus to the next right-most tab
+3.0 Return focus to the next right-most tab and goto Step 1.0
