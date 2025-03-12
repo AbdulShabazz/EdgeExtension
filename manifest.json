@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "VideoGen YouTube AutoUploader",
+  "version": "1.0",
+  "description": "Auto-download videos from video-gens.com and upload to YouTube.",
+  "permissions": [
+    "downloads",       /* Allows use of chrome.downloads API&#8203;:contentReference[oaicite:5]{index=5} */
+    "tabs",            /* Allows tab querying & updating&#8203;:contentReference[oaicite:6]{index=6} */
+    "*://video-gens.com/*",   /* Access video site pages/content */
+    "*://*.youtube.com/*"     /* Access YouTube pages (e.g., upload) */
+  ],
+  "host_permissions": [
+    "*://video-gens.com/*",
+    "*://*.youtube.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://video-gens.com/*"],
+      "js": ["content.js"]
+    },
+    {
+      "matches": ["*://www.youtube.com/upload*"],
+      "js": ["youtubeContent.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_icon": "icon.png",
+    "default_title": "VideoGen Uploader"
+  }
+}
