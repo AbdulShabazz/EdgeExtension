@@ -4,10 +4,10 @@
   "version": "1.0",
   "description": "Auto-download videos from video-gens.com and upload to YouTube.",
   "permissions": [
-    "downloads",       /* Allows use of chrome.downloads API&#8203;:contentReference[oaicite:5]{index=5} */
-    "tabs",            /* Allows tab querying & updating&#8203;:contentReference[oaicite:6]{index=6} */
-    "*://video-gens.com/*",   /* Access video site pages/content */
-    "*://*.youtube.com/*"     /* Access YouTube pages (e.g., upload) */
+    "downloads",
+    "tabs",
+    "*://video-gens.com/*",
+    "*://*.youtube.com/*"
   ],
   "host_permissions": [
     "*://video-gens.com/*",
