@@ -15,3 +15,5 @@ TODO:
 2.2 Complete video title, description, playlist, and visibility fields
 2.3 Submit and upload the video
 3.0 Return focus to the next right-most tab and goto Step 1.0
+
+Note the 73 video/day uploads limit
