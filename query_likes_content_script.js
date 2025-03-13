@@ -16,15 +16,18 @@ function queryHTMLElements() {
             textContent: element.textContent.substring(0, 100) // Limit text length
         } */
     });
-    
-    // Send the list to the background script
-    chrome.runtime.sendMessage({
-        action: 'NewDataIndexElementsFound',
-        elements: /* elementsWithDataIndexes */ dataIndexElements,
-        length: /* elementsWithDataIndexes.length */ dataIndexElements.length //,
-        //url: window.location.href
-    });
-    
+    try {
+        // Send the list to the background script
+        chrome.runtime.sendMessage({
+            action: 'NewDataIndexElementsFound',
+            elements: /* elementsWithDataIndexes */ dataIndexElements,
+            length: /* elementsWithDataIndexes.length */ dataIndexElements.length //,
+            //url: window.location.href
+        });
+    }
+    catch (e) {
+        console.info ("warning: Extension context invalidated before a value could be returned for 'NewDataIndexElementsFound' event.")
+    }
     //console.log(`Found ${dataIndexElements.length} elements with data-index`);
     
     return /* dataIndexElements */;
@@ -48,22 +51,26 @@ function dataIndexElementClicked(event) {
     // If we found an element with data-index
     if (dataIndexElement) {
         const url = dataIndexElement.querySelectorAll('div > div > div > a')[0]?.href || '';
-        const dataIndexValue = dataIndexElement.getAttribute('data-index');        
-        // Send a message to the background script
-        chrome.runtime.sendMessage({
-            action: 'DataIndexElementClicked',
-            dataIndex: dataIndexValue,
-            url: url //,
-            /* 
-            element: dataIndexElement
-            dataIndex: dataIndexValue,
-            elementText: dataIndexElement.textContent.substring(0, 100), // Limit text length
-            tagName: dataIndexElement.tagName,
-            url: window.location.href,
-            timestamp: new Date().toISOString()
-            */
-        });
-        
+        const dataIndexValue = dataIndexElement.getAttribute('data-index');       
+        try {
+            // Send a message to the background script
+            chrome.runtime.sendMessage({
+                action: 'DataIndexElementClicked',
+                dataIndex: dataIndexValue,
+                url: url //,
+                /* 
+                element: dataIndexElement
+                dataIndex: dataIndexValue,
+                elementText: dataIndexElement.textContent.substring(0, 100), // Limit text length
+                tagName: dataIndexElement.tagName,
+                url: window.location.href,
+                timestamp: new Date().toISOString()
+                */
+            });
+        }
+        catch (e) {
+            console.info ("warning: Extension context invalidated before a value could be returned for 'DataIndexElementClicked' event.")
+        }
         //console.log(`Element with data-index="${dataIndexValue}" was clicked`);
     } // end if (dataIndexElement)
 } // end dataIndexElementClicked
