@@ -5,11 +5,7 @@
   "description": "Auto-download videos from video-gens.com and upload to YouTube.",
   "permissions": [
     "downloads",
-    "tabs",
-    "https://sora.com/g/*",
-    "https://sora.com/explore/recent/*",
-    "https://translate.google.com/*",
-    "https://studio.youtube.com/*"
+    "tabs"
   ],
   "host_permissions": [
     "https://sora.com/g/*",
