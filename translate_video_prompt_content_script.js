@@ -1,6 +1,0 @@
-
-(function(){
-  window.addEventListener('DOMContentLoaded', () => {
-
-  })
-})()
