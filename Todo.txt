@@ -4,23 +4,23 @@ TODO:
 1.1 Upon new Like found, open new tab without focus (background)
 1.2 Acquire video encoding settings + video description
 1.3 Strip non-supported english text
-1.4 Enter video description text on translation site and compare to desired english output.
-1.5.a If the two match, then no-translation is required; otherwise, append the translated text onto the description,
+2.0 Enter video description text on translation site and compare to desired english output.
+2.1.a If the two match, then no-translation is required; otherwise, append the translated text onto the description,
   prepended by the language designation
-1.6 Generate the video on the Host site
-1.6.a if the video is [480p] && [<10s], Upscale the video [remix:mild]
-1.6.b if the video is [480p] && [>5s], same-scale the video [remix:0]
-1.6.c if the video is [>480p] && [<10s], same-scale the video [remix:0]
-1.6.d if the video is [>480p] && [>5s], capture video title, for & description
-1.7.a if the video is [>15s], abort. (a looping style video is required)
-1.7.b Copy the video title
-1.8 Add the newly generted video to Favorites
-1.9 Download the video
-1.10 Close the tab
-2.0 Get or Open the Video Upload site (e.g., Youtube, iff necessary), in the background, specifically the Upload page
-2.1 Select the target video to upload
-2.2 Complete video title, description, playlists, and visibility fields in the submission form
-2.3 Submit and upload the video (background)
-3.0 Alert the user to the current total uploads performed this session, using a transient window
+3.0 Return to the Host and Generate the video on the Host site
+3.1.a if the video is [480p] && [<10s], Upscale the video [remix:mild]
+3.1.b if the video is [480p] && [>5s], same-scale the video [remix:0]
+3.1.c if the video is [>480p] && [<10s], same-scale the video [remix:0]
+3.1.d if the video is [>480p] && [>5s], capture video title, for & description
+3.2.a if the video is [>15s], abort. (a looping style video is required)
+3.2.b Copy the video title
+3.3 Add the newly generted video to Favorites
+3.4 Download the video
+3.5 Close the tab
+4.0 Get or Open the Video Upload site (e.g., Youtube, iff necessary), in the background, specifically the Upload page
+4.1 Select the target video to upload
+4.2 Complete video title, description, playlists, and visibility fields in the submission form
+4.3 Submit and upload the video (background)
+5.0 Alert the user to the current total uploads performed this session, using a transient window
 
 Note the 73 video daily upload limit
