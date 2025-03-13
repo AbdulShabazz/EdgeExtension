@@ -1,7 +1,7 @@
 TODO: 
 
 1.0 Monitor sora.com/explore/recent for Likes
-1.1 Upon like found, open new tab without focus
+1.1 Upon new Like found, open new tab without focus (background)
 1.2 Acquire video encoding settings + video description
 1.3 Strip non-supported english text
 1.4 Enter video description text on translation site and compare to desired english output.
