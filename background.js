@@ -1,3 +1,4 @@
+
 // background.js (runs as a service worker in Edge/Chrome extension)
 
 let totalUploadsInt64 = 0;

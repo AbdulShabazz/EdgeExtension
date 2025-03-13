@@ -1,3 +1,4 @@
+
 // content.js (runs on video-gens.com pages)
 (function() {
   // Wait for the DOM to load or video element to be ready

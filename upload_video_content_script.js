@@ -1,3 +1,4 @@
+
 // youtubeContent.js (runs on YouTube upload page)
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (message.action === 'startUpload') {
