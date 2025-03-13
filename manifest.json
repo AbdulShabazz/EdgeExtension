@@ -19,7 +19,7 @@
   "content_scripts": [
     {
       "matches": ["https://translate.google.com/*"],
-      "js": ["translate_video_prompt_content_script.js"]
+      "js": ["extract_english_translation_content_script.js"]
     },
     {
       "matches": ["https://sora.com/explore/recent/*"],
