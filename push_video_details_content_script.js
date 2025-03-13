@@ -2,6 +2,7 @@
 (function() {
   // Wait for the DOM to load or video element to be ready
   window.addEventListener('DOMContentLoaded', () => {
+    /*
     const videoElem = document.querySelector('video');
     if (!videoElem) return;  // No video element found
 
@@ -44,5 +45,6 @@
       bitrate: bitrateText
     });
     // The background script will handle the rest (download and upload).
+    */
   });
 })();
