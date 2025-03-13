@@ -1,11 +1,45 @@
 
 // background.js (runs as a service worker in Edge/Chrome extension)
 
-let totalUploadsInt64 = 0;
 let InprocessInt64 = 0;
+let totalLikesInt64 = new Set ();
+
+function generateVideo (details) {
+
+} // generateVideo
+
+function updateLikes (u) {
+    let ret = false;
+    if (!totalLikesInt64.has (u)) {
+        totalLikesInt64.add (u);
+        ret = true;
+    }
+    return ret;
+} // end updateLikes
+
+function openTab (url) {
+
+} // end openTab 
+
+function preGenerateVideo (msg) {
+    //const dataIndex = msg.element.getAttribute('data-index');
+    if (updateLikes (msg.dataIndex)) {
+        openTab (msg.url);
+    }
+} // end generateVideo
 
 // Listen for one-time messages from content scripts&#8203;:contentReference[oaicite:13]{index=13}.
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  switch (message.action) {
+      case 'DataIndexElementClicked':
+          preGenerateVideo (message);
+          break;
+      case 'NewDataIndexElementsFound':
+        break;
+      case 'videoFound':
+          break;
+  } // end switch (message.action)
+  
   if (message.action === 'videoFound') {
     /*
     const videoUrl = message.url;
