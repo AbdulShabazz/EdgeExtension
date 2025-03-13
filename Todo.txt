@@ -6,15 +6,15 @@ TODO:
 1.2.0 If the two match, then no-translation is required; otherwise, append the translated text onto the description,
   prepended by the language designation
 1.3 Generate the video on the Host site
-1.3.0 if the image is [480p] & [<10s], Upscale the image [mild:remix]
-1.3.0 if the image is [480p] & [>5s], same-scale the image [0:remix]
-1.3.0 if the image is [>480p] & [<10s], same-scale the image [0:remix]
-1.3.0 if the image is [>480p] & [>5s], capture video title, for & description
+1.3.0 if the image is [480p] && [<10s], Upscale the image [mild:remix]
+1.3.0 if the image is [480p] && [>5s], same-scale the image [0:remix]
+1.3.0 if the image is [>480p] && [<10s], same-scale the image [0:remix]
+1.3.0 if the image is [>480p] && [>5s], capture video title, for & description
 1.3.0.1 generate Loop video [5s]
 1.4 Record the video title [optional]
-1.5 Add video to Favorites
+1.5 Add generted video to Favorites
 1.6 Download the video
-1.7 Close the tab or page
+1.7 Close the tab
 2.0 Open the Video Hosting site (e.g., Youtube), specifically the Uploads page
 2.1 Select target video
 2.2 Complete video title, description, playlist, and visibility fields
