@@ -15,7 +15,7 @@ TODO:
 3.2.a if the video is [>15s], abort. (a looping style video is required)
 3.2.b Copy the video title
 3.3 Add the newly generted video to Favorites
-3.4 Download the video
+3.4 Download [video].mp4 + [video].log (file contents include video title + full prompt)
 3.5 Close the tab
 4.0 Get or Open the Video Upload site (e.g., Youtube, iff necessary), in the background, specifically the Upload page
 4.1 Select the target video to upload
