@@ -18,10 +18,12 @@ function updateLikes (u) {
 } // end updateLikes
 
 function openTab (url) {
-
+    chrome.tabs.create({ url: url, active: false }, tab => {
+        tab;
+    });
 } // end openTab 
 
-function preGenerateVideo (msg) {
+function preEvaluateVideo (msg) {
     //const dataIndex = msg.element.getAttribute('data-index');
     if (updateLikes (msg.dataIndex)) {
         openTab (msg.url);
@@ -32,7 +34,7 @@ function preGenerateVideo (msg) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.action) {
       case 'DataIndexElementClicked':
-          preGenerateVideo (message);
+          preEvaluateVideo (message);
           break;
       case 'NewDataIndexElementsFound':
         break;
