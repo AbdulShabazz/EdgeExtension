@@ -7,11 +7,14 @@
     "downloads",
     "tabs",
     "https://sora.com/g/*",
+    "https://sora.com/explore/recent/*",
     "https://translate.google.com/*",
     "https://studio.youtube.com/*"
   ],
   "host_permissions": [
     "https://sora.com/g/*",
+    "https://sora.com/explore/recent/*",
+    "https://translate.google.com/*",
     "https://studio.youtube.com/*"
   ],
   "background": {
@@ -19,13 +22,20 @@
   },
   "content_scripts": [
     {
+      "matches": ["https://translate.google.com/*"],
+      "js": ["translate_video_prompt_content_script.js"]
+    },
+    {
+      "matches": ["https://sora.com/explore/recent/*"],
+      "js": ["query_likes_content_script.js"]
+    },
+    {
       "matches": ["https://sora.com/g/*"],
-      "js": ["content.js"]
+      "js": ["push_video_details_content_script.js"]
     },
     {
       "matches": ["https://studio.youtube.com/*"],
-      "js": ["youtubeContent.js"],
-      "run_at": "document_idle"
+      "js": ["upload_video_details_content_script.js"]
     }
   ],
   "action": {
