@@ -1,16 +1,21 @@
 // background.js (runs as a service worker in Edge/Chrome extension)
 
+let totalUploadsInt64 = 0;
+let InprocessInt64 = 0;
+
 // Listen for one-time messages from content scripts&#8203;:contentReference[oaicite:13]{index=13}.
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'videoFound') {
+    /*
     const videoUrl = message.url;
     let videoTitle = message.title || 'Video';
     if (!videoTitle.toLowerCase().endsWith('.mp4')) {
       videoTitle += '.mp4';  // ensure the filename has .mp4 extension
     }
 
-    console.log('Downloading video:', videoUrl);
+    //console.log('Downloading video:', videoUrl);
     // Initiate download of the video file using the Downloads API&#8203;:contentReference[oaicite:14]{index=14}.
+    /*
     chrome.downloads.download({
       url: videoUrl,
       filename: videoTitle,   // Save as this name in the user's Downloads folder
@@ -52,6 +57,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         });
       }
     });
+  */
   }
   // Return true to indicate we'll send a response asynchronously (if needed).
   return true;
