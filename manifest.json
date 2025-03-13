@@ -35,7 +35,7 @@
     },
     {
       "matches": ["https://studio.youtube.com/*"],
-      "js": ["upload_video_details_content_script.js"]
+      "js": ["upload_video_content_script.js"]
     }
   ],
   "action": {
