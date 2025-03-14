@@ -64,6 +64,71 @@ function stripSymbols (promptW) {
     return prompt;
 } // end stripSymbols
 
+function downloadLog (msg) {
+    const fileTitle = `${message.title.replace (/\s/g, '_')}.log`;
+    let f = new Blob ();
+    chrome.downloads.download({
+        url: videoUrl,
+        filename: videoTitle,   // Save as this name in the user's Downloads folder
+        saveAs: false           // No Save As dialog, download automatically
+    }, downloadId => {
+      if (chrome.runtime.lastError || !downloadId) {
+          console.error('Download failed:', chrome.runtime.lastError);
+      } else {
+          // Monitor the download until it’s complete.
+          chrome.downloads.onChanged.addListener(function onChanged(delta) {
+              if (delta.id === downloadId && delta.state && delta.state.current === 'complete') {
+                  // Download is complete&#8203;:contentReference[oaicite:15]{index=15}.
+                  chrome.downloads.onChanged.removeListener(onChanged);
+                  console.log('Video .log downloaded.');
+
+                  // Get the file size from the download item
+                  chrome.downloads.search({ id: downloadId }, function(results) {
+                      let fileSizeBytes = results && results[0] ? results[0].fileSize : 0;
+                      let fileSizeMB = fileSizeBytes ? (fileSizeBytes / (1024*1024)).toFixed(2) + ' MB' : '';
+                      
+                      // Find an open YouTube tab.
+                      chrome.tabs.query({ url: "*://*.youtube.com/*" }, function(tabs) {
+                          if (tabs.length === 0) {
+                              console.warn('No open YouTube tab found. Opening a new one.');
+                              openTab({ url: "https://www.youtube.com/upload" });
+                          } else {
+                              // Use the first YouTube tab found (could refine to specific tab if needed).
+                              let ytTab = tabs[0];
+                              // Navigate it to the upload page (if not already there).
+                              chrome.tabs.update(ytTab.id, { url: "https://www.youtube.com/upload", active: false }, 
+                              updatedTab => {
+                                  ;;
+                              });
+                          }
+                      });
+                  });
+              }
+          });
+        }
+    });
+} // end downloadLog
+
+function standardizeEnglishPrompt (prompt) {
+    // Find an open YouTube tab.
+    const urlSearch = "*://translate.google.com/*";
+    const url = 'https://translate.google.com';
+    chrome.tabs.query({ url: urlSearch }, function(tabs) {
+        if (tabs.length === 0) {
+            console.warn('No open translate tab found. Opening a new one.');
+            openTab (url);
+        } else {
+            // Use the first YouTube tab found (could refine to specific tab if needed).
+            let ytTab = tabs[0];
+            // Navigate it to the upload page (if not already there).
+            chrome.tabs.update(ytTab.id, { url: url, active: false }, 
+            updatedTab => {
+                ;;
+            });
+        }
+    });
+} // end standardizePrompt
+
 // Listen for one-time messages from content scripts&#8203;:contentReference[oaicite:13]{index=13}.
 chrome.runtime.onConnect.addListener ((port) => {
     port.onMessage.addListener((message, sender, sendResponse) => {
@@ -83,27 +148,35 @@ chrome.runtime.onConnect.addListener ((port) => {
             const tmpPrompt = message.prompt;
             const videoTitleW = message.videoTitle;
             const prompt = stripSymbols(tmpPrompt);
+            const fullPrompt = standardizeEnglishPrompt (prompt);
             const { status, resolution, duration, remix } = calcResolutionAndDuration (tmpResolutionW, tmpDurationW);
             if (status === 'continue') {
                 port.postMessage({
                     action:"doRemix",
                     uuid: uuid,
+                    title: videoTitleW,
+                    prompt: prompt,
                     resolution: resolution,
                     duration: duration,
                     remix: remix
                 });
-                // wait for video [body] to generate ...
-                // add to Favorites
-                // get video title
-                // d/l [video].mp4
-                // get/create translate tab: extract English translation
-                // d/l [video].log (title + english prompt [+ prompt])
             } // end if (status === 'continue')
+            break;
+
+            case 'downloadCompleted':
+            chrome.tabs.query ({ url:message.url }, (tabs) => {
+                tabs.forEach (tab => {
+                    if (tab.id) {
+                        chrome.tabs.remove (tab.id);
+                    }
+                });
+            });
+            downloadLog(message);
             break;
         } // end switch (message.action)
 
         // Periodically check for new videos (small overhead)
-        setInterval(preEvaluateVideo, 10);
+        setInterval(preEvaluateVideo, 1);
 
         /*
         if (message.action === 'videoFound') {
