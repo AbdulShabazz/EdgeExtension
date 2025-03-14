@@ -1,5 +1,6 @@
 
 // Content script for Microsoft Edge extension
+const port = chrome.runtime.connect ();
 
 // Function to query all elements with data-index and report them
 function queryHTMLElements() {
@@ -18,7 +19,7 @@ function queryHTMLElements() {
     });
     try {
         // Send the list to the background script
-        chrome.runtime.sendMessage({
+        port.postMessage({
             action: 'NewDataIndexElementsFound',
             elements: /* elementsWithDataIndexes */ dataIndexElements,
             length: /* elementsWithDataIndexes.length */ dataIndexElements.length //,
@@ -54,7 +55,7 @@ function dataIndexElementClicked(event) {
         const dataIndexValue = dataIndexElement.getAttribute('data-index');       
         try {
             // Send a message to the background script
-            chrome.runtime.sendMessage({
+            port.postMessage({
                 action: 'DataIndexElementClicked',
                 dataIndex: dataIndexValue,
                 url: url //,
