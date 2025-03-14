@@ -9,10 +9,10 @@ port.onMessage.addListener((message, sender, sendResponse) => {
         doRemixF (message);
         break;
 
-        case 'addToFAVS':
+        case 'navigateToVideoURL':
         break;
 
-        case 'd/l':
+        case 'doDownload':
         break;
     }
 });
@@ -48,30 +48,96 @@ const select_3_remix_strength_xpath = "";
 const select_2_remix_strength_xpath = "";
 const select_1_remix_strength_xpath = "";
 const select_0_remix_strength_xpath = "";
+const focus_activity_window_xpath = "//*[@id=\"radix-:r1p:\"]/div/div[2]/div/div/div/div[3]/div[1]/button";
+const select_latest_activity_xpath = "//*[@id=\"radix-:r64:\"]/div/a[1]";
+const select_AddToFAVS_xpath = "//*[@id=\"radix-:r12:\"]/div/div[2]/div/div/div/div[3]/div[1]/button";
+const select_confirm_download_xpath = "//*[@id=\"radix-:r9c:\"]/div[2]/button[2]";
 
-// Form Details
+// Shortcut keys + keyCodes
+
+const keyCodeMap = {
+    "a": 65, "b": 66, "c": 67, "d": 68, "e": 69, "f": 70, "g": 71,
+    "h": 72, "i": 73, "j": 74, "k": 75, "l": 76, "m": 77, "n": 78,
+    "o": 79, "p": 80, "q": 81, "r": 82, "s": 83, "t": 84, "u": 85,
+    "v": 86, "w": 87, "x": 88, "y": 89, "z": 90,
+    "0": 48, "1": 49, "2": 50, "3": 51, "4": 52, "5": 53, "6": 54,
+    "7": 55, "8": 56, "9": 57,
+    "Enter": 13, "Escape": 27, "Space": 32, "Tab": 9,
+    "ArrowUp": 38, "ArrowDown": 40, "ArrowLeft": 37, "ArrowRight": 39
+};
+
+function simulateKeyPress (key, keyCode) {
+    let evt = new KeyboardEvent("keydown", {
+        key: key,
+        //code: "KeyR",
+        keyCode: keyCodeMap[key] || keyCode,
+        which: keyCodeMap[key] || keyCode,
+        bubbles: true,
+        cancelable: true
+    });
+    document.dispatchEvent(evt);
+    /*
+    function simulateKeyPress () {
+        let evt = new KeyboardEvent("keydown", {
+            key: "r",
+            code: "KeyR",
+            keyCode: 82,
+            which: 82,
+            bubbles: true,
+            cancelable: true
+        });
+        document.dispatchEvent(evt);
+    }
+    let script = document.createElement('script');
+    script.textContent = `(${simulateKeyPress.toString()})();`;
+    document.documentElement.appendChild(script);
+    script.remove ();
+    */
+} // end simulateKeyPress
+
+let downloadID = null;
+
+function confirmDownloadFromXPath () {
+    if (invokeCtlFromXPath (select_confirm_download_xpath)) {
+        clearInterval (downloadID);
+        port.postMessage ({ 
+            action: 'downloadCompleted',
+            url: window.location.href
+        });
+    };
+}
+
+function doDownload () {
+    simulateKeyPress ("d");
+    downloadID = setInterval (confirmDownloadFromXPath, 1);
+} // end doDownload
 
 function doRemixF (msg) {
     const uuid = msg.uuid;
     const xpath = msg.xpath;
     if (uuid === _uuid_ ) {
-        invokeCtlFromXPath (xpath);
+        const resolution = msg.resolution;
+        const duration = msg.duration;
+        const remix = msg.remix;
+        invokeCtlFromXPath (xpath); // set focus remix.click ()
+        // generate video ...
+        // wait for video [body] to generate ...
+        // navigate to new video url
+        // add to Favorites
+        // get video title
+        // doDownload (); // d/l [video].mp4
+        // doDownload (); // d/l [video].log (title + english prompt [+ prompt])
         /*
-        function simulateKeyPress () {
-            let evt = new KeyboardEvent("keydown", {
-                key: "r",
-                code: "KeyR",
-                keyCode: 82,
-                which: 82,
-                bubbles: true,
-                cancelable: true
-            });
-            document.dispatchEvent(evt);
-        }
-        let script = document.createElement('script');
-        script.textContent = `(${simulateKeyPress.toString()})();`;
-        document.documentElement.appendChild(script);
-        script.remove ();
+        // close window
+        port.postMessage ({
+            action:"downloadCompleted",
+            uuid: uuid,
+            title: newVideoTitleW,
+            prompt: prompt,
+            resolution: resolution,
+            duration: duration,
+            remix: remix
+        });
         */
     } // end if(uuid === _uuid_ )
 } // end doRemixF
@@ -92,10 +158,18 @@ function getElementByXPath (xpath) {
 } // end getElementByXPath
 
 function invokeCtlFromXPath (xpath) {
+    let ret = false;
     const ctl = getElementByXPath(xpath);
     if (ctl) {
-        ctl.click();
+        try {
+            ctl.click();
+            ret = true;
+        }
+        catch (e) {
+            console.warn (`Method call: push_video_details_content_script::invokeCtlFromXPath: ${JSON.stringify(e)}`);
+        }
     }
+    return ret;
 } // end invokeCtlFromXPath
 
 function getValueFromXPath(xpath) {
