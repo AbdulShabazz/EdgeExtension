@@ -112,24 +112,39 @@ function downloadLog (msg) {
 function standardizeEnglishPrompt (message) {
     // Find an open YouTube tab.
     const urlSearch = "*://translate.google.com/*";
-    const url = 'https://translate.google.com';
+    const url = `https://translate.google.com/?sl=auto&tl=en&op=translate&text=${message.prompt}`;
     chrome.tabs.query({ url: urlSearch }, function(tabs) {
         if (tabs.length === 0) {
             console.warn('No open translate tab found. Opening a new one.');
-            openTab (url);
+            openTab (url); // open tab in the bg
         } else {
-            // Use the first YouTube tab found (could refine to specific tab if needed).
-            let ytTab = tabs[0];
-            // Navigate it to the upload page (if not already there).
-            chrome.tabs.update(ytTab.id, { url: url, active: false }, 
-            updatedTab => {
-                ;;
-            });
+            // Use the first translate tab found
+            let translateTab = tabs[0];
+            // Navigate it to the translate page (if not already there)
+            chrome.tabs.update(
+                translateTab.id, 
+                { url: url, active: false }, 
+                function (updatedTab) {
+                    console.log('Updated existing translate.google.com tab');
+                    /* 
+                    chrome.tabs.onUpdated.addListener(function listener(id, info) {
+                        if (id === updatedTab && info.status === 'complete') {
+                            // Remove the listener to avoid memory leaks
+                            chrome.tabs.onUpdated.removeListener(listener);
+                            
+                            // Now the tab is fully loaded, send your message
+                            message.action = 'generateEnglishPrompt';
+                            chrome.tabs.sendMessage(message);
+                        }
+                    });
+                    */
+                }
+            );
         }
     });
-    message.action = 'generateEnglishPrompt';
-    port.postMessage(message);
 } // end standardizePrompt
+
+let buffer = null;
 
 // Listen for one-time messages from content scripts&#8203;:contentReference[oaicite:13]{index=13}.
 chrome.runtime.onConnect.addListener ((port) => {
@@ -145,7 +160,14 @@ chrome.runtime.onConnect.addListener ((port) => {
 
             case 'videoFound':
             message.prompt = stripSymbols(message.prompt);
-            standardizeEnglishPrompt (prompt);
+            standardizeEnglishPrompt (message);
+            message.action = 'generateEnglishPrompt';
+            // cache workload //
+            buffer = message;
+            break;
+
+            case 'translateSiteReady':
+            port.postMessage (buffer);
             break;
 
             case 'EnglishPromptCompleted':

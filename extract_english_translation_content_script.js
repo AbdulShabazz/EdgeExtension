@@ -2,7 +2,7 @@
 const select_text_translate_xpath = "//*[@id=\"yDmH0d\"]/c-wiz/div/div[2]/c-wiz/div[1]/nav/div[1]/div/button";
 const select_auto_detect_input_xpath = "//*[@id=\"yDmH0d\"]/c-wiz/div/div[2]/c-wiz/div[2]/c-wiz/div[1]/div[1]/c-wiz/div[2]/c-wiz/div[1]/div/div[3]/div/div[1]/span/div[1]/div[2]";
 const select_english_output_xpath = "//*[@id=\"i15\"]";
-const textarea_input_xpath = "//*[@id=\"yDmH0d\"]/c-wiz/div/div[2]/c-wiz/div[2]/c-wiz/div[1]/div[2]/div[2]/div/c-wiz/span/span/div/textarea";
+const textarea_input_xpath = "//*[@id=\"yDmH0d\"]/c-wiz/div/div[2]/c-wiz/div[2]/c-wiz/div[1]/div[2]/div[2]/div/c-wiz/span/span/div/div[1]";
 const textarea_translation_xpath = "//*[@id=\"yDmH0d\"]/c-wiz/div/div[2]/c-wiz/div[2]/c-wiz/div[1]/div[2]/div[2]/c-wiz/div/div[6]/div/div[1]/span[1]/span/span";
 const detected_language_xpath = "//*[@id=\"c58\"]/span[1]";
 
@@ -14,26 +14,44 @@ const port = chrome.runtime.connect ();
 port.onMessage.addListener((message, sender, sendResponse) => {
     switch (message.action) {
         case 'generateEnglishPrompt':
+        /* 
         let ret = message.prompt;
-        message.action = "EnglishPromptCompleted";
         message.xpath = select_remix_xpath;
         invokeCtlFromXPath (select_text_translate_xpath);
         invokeCtlFromXPath (select_auto_detect_input_xpath);
         invokeCtlFromXPath (select_english_output_xpath);
-        const inputText = getElementByXPath (textarea_input_xpath);
+         */
+        const inputText = document.querySelector('textarea[aria-label]'); //getElementByXPath (textarea_input_xpath);
         // simulate input event //
-        let event = new InputEvent ({ 
+        /*
+        let event = new Event ({ 
             type:'input',
             bubbles: true,
             cancelable: true,
             data: message.prompt // update input in the bg
         });
+        inputText.value = message.prompt;
+        inputText.textContent = message.prompt;
         inputText.dispatchEvent(event);
-        const translatedText = getElementByXPath (textarea_translation_xpath);
+        * /
+        inputText.focus();
+        inputText.value = message.prompt;        
+        // Create and dispatch an input event to trigger Google Translate
+        const inputEvent = new InputEvent('input', {
+          bubbles: true,
+          cancelable: true,
+        });
+        inputEvent.dispatchEvent(inputEvent);
+        */
+        // Finally dispatch the input event
+        //inputText.dispatchEvent(new Event('input', { bubbles: true }));
+        // todo: wait for page to render //
+        const translatedText = document.querySelector ('[jsname="W297wb"]'); //getElementByXPath (textarea_translation_xpath);
         if (translatedText.textContent != inputText.textContent) {
             const lang = getValueFromXPath (detected_language_xpath);
-            message.prompt = `${message.prompt} (Original ${lang}: ${translatedText.textContent})`;
+            message.prompt = `${translatedText.textContent} (Original ${lang}: ${message.prompt})`;
         }
+        message.action = "EnglishPromptCompleted";
         port.postMessage (message);
         break;
     }
@@ -102,16 +120,19 @@ function getValueFromXPath(xpath) {
 } // end getValueFromXPath
 
 function parseBody () {
-  // Send message to background script to initiate video remix.
-  const textTranslatOption = getValueFromXPath(select_text_translate_xpath);
-  if (textTranslatOption === '')
-      return;
-  clearInterval (intID);
-  invokeCtlFromXPath (select_text_translate_xpath);
-  invokeCtlFromXPath (select_auto_detect_input_xpath);
-  invokeCtlFromXPath (select_english_output_xpath);
-  // Init bg listener
-  siteReadyFlag = true;
+    // Allow updates when page is ready
+    // Send message to background script to initiate video remix.
+    const textTranslatOption = getValueFromXPath(select_text_translate_xpath);
+    if (textTranslatOption === '')
+        return;
+    clearInterval (intID);
+    /* 
+    invokeCtlFromXPath (select_text_translate_xpath);
+    invokeCtlFromXPath (select_auto_detect_input_xpath);
+    invokeCtlFromXPath (select_english_output_xpath);
+     */
+    // Init bg listener
+    port.postMessage ({ action: "translateSiteReady" });
 } // end parseBody
 
 let intID = setInterval(parseBody, false);
