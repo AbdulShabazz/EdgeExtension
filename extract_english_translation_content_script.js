@@ -21,8 +21,13 @@ port.onMessage.addListener((message, sender, sendResponse) => {
         invokeCtlFromXPath (select_auto_detect_input_xpath);
         invokeCtlFromXPath (select_english_output_xpath);
         const inputText = getElementByXPath (textarea_input_xpath);
-        inputText.textContent = message.prompt;
-        let event = new Event ({ type:'input'});
+        // simulate input event //
+        let event = new InputEvent ({ 
+            type:'input',
+            bubbles: true,
+            cancelable: true,
+            data: message.prompt // update input in the bg
+        });
         inputText.dispatchEvent(event);
         const translatedText = getElementByXPath (textarea_translation_xpath);
         if (translatedText.textContent != inputText.textContent) {

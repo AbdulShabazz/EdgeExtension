@@ -53,6 +53,43 @@ const select_latest_activity_xpath = "//*[@id=\"radix-:r64:\"]/div/a[1]";
 const select_AddToFAVS_xpath = "//*[@id=\"radix-:r12:\"]/div/div[2]/div/div/div/div[3]/div[1]/button";
 const select_confirm_download_xpath = "//*[@id=\"radix-:r9c:\"]/div[2]/button[2]";
 
+// Simulating mouse clicks
+
+function clickAboveElement(element, pixelsAbove = 12) {
+    // Get element's position relative to the viewport
+    const rect = element.getBoundingClientRect();
+    
+    // Calculate position (center of element, pixelsAbove pixels above the top)
+    const x = rect.left + rect.width / 2;
+    const y = rect.top - pixelsAbove;
+    
+    // Add scroll position to get absolute coordinates
+    const absoluteX = x + window.scrollX;
+    const absoluteY = y + window.scrollY;
+    
+    // Create and dispatch mouse event
+    const clickEvent = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        screenX: absoluteX,
+        screenY: absoluteY,
+        clientX: x,
+        clientY: y
+    });
+    
+    // Dispatch the event at the calculated position
+    document.elementFromPoint(x, y)?.dispatchEvent(clickEvent);
+
+    /*
+    // Usage example //
+    const element = document.getElementById('my-element');
+    // Click 5px above the element //
+    clickAboveElement(element, 5);
+    */
+
+} // end clickAboveElement
+
 // Shortcut keys + keyCodes
 
 const keyCodeMap = {
