@@ -109,7 +109,7 @@ function downloadLog (msg) {
     });
 } // end downloadLog
 
-function standardizeEnglishPrompt (prompt) {
+function standardizeEnglishPrompt (message) {
     // Find an open YouTube tab.
     const urlSearch = "*://translate.google.com/*";
     const url = 'https://translate.google.com';
@@ -127,6 +127,8 @@ function standardizeEnglishPrompt (prompt) {
             });
         }
     });
+    message.action = 'generateEnglishPrompt';
+    port.postMessage(message);
 } // end standardizePrompt
 
 // Listen for one-time messages from content scripts&#8203;:contentReference[oaicite:13]{index=13}.
@@ -142,13 +144,17 @@ chrome.runtime.onConnect.addListener ((port) => {
             break;
 
             case 'videoFound':
+            message.prompt = stripSymbols(message.prompt);
+            standardizeEnglishPrompt (prompt);
+            break;
+
+            case 'EnglishPromptCompleted':
             const uuid = message.uuid;
             const tmpResolutionW = message.resolution;
             const tmpDurationW = message.duration;
             const tmpPrompt = message.prompt;
             const videoTitleW = message.videoTitle;
-            const prompt = stripSymbols(tmpPrompt);
-            const fullPrompt = standardizeEnglishPrompt (prompt);
+            const prompt = message.prompt;
             const { status, resolution, duration, remix } = calcResolutionAndDuration (tmpResolutionW, tmpDurationW);
             if (status === 'continue') {
                 port.postMessage({
