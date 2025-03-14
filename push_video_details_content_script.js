@@ -1,5 +1,151 @@
 
 // content.js (runs on video-gens.com pages)
+
+const port = chrome.runtime.connect ();
+port.onMessage.addListener((message, sender, sendResponse) => {
+    switch (message.action) {
+        case 'doRemix':
+        message.xpath = select_remix_xpath;
+        doRemixF (message);
+        break;
+
+        case 'addToFAVS':
+        break;
+
+        case 'd/l':
+        break;
+    }
+});
+
+// globals
+let _uuid_ = "";
+
+// Video Details
+const videoName_xpath = "/html/body/main/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div[3]/div"; // name
+const resolution_xpath = "/html/body/main/div/div[2]/div/div/div/div[2]/div/div/div/div[2]/div[1]"; // resolution
+const duration_xpath = "/html/body/main/div/div[1]/div/div/div[2]/div/div/div/div[2]/div/div[2]"; // duration
+const prompt_xpath = "/html/body/main/div/div[1]/div/div/div[2]/div/div/div/div[1]/div/div/div/button"; // prompt
+
+// Remix Controls
+const select_remix_xpath = "/html/body/main/div/div[1]/div/div/div[2]/div/div/div/div[3]/div/div[5]/button"; // remix ctl
+const focus_resolution_xpath = "//*[@id=\"radix-:r1o:\"]/div/div[1]/div/div/div[2]/div/div/div/div/div/div[2]/div[2]/div[1]/button[1]"; // Show available Screen Resolutions
+const select_480p_xpath = "";
+const select_720p_xpath = "";
+const select_1080p_xpath = "";
+const focus_new_videos_xpath = "//*[@id=\"radix-:r1o:\"]/div/div[1]/div/div/div[2]/div/div/div/div/div/div[2]/div[2]/div[1]/button[2]";
+const select_1_new_videos_xpath = "";
+const select_2_new_videos_xpath = "";
+const focus_remix_strength_xpath = "//*[@id=\"radix-:r1o:\"]/div/div[1]/div/div/div[2]/div/div/div/div/div/div[2]/div[2]/div[1]/button[3]";
+const select_strong_remix_strength_xpath = "";
+const select_mild_remix_strength_xpath = "";
+const select_subtle_remix_strength_xpath = "";
+const select_custom_remix_strength_xpath = "";
+const select_7_remix_strength_xpath = "";
+const select_6_remix_strength_xpath = "";
+const select_5_remix_strength_xpath = "";
+const select_4_remix_strength_xpath = "";
+const select_3_remix_strength_xpath = "";
+const select_2_remix_strength_xpath = "";
+const select_1_remix_strength_xpath = "";
+const select_0_remix_strength_xpath = "";
+
+// Form Details
+
+function doRemixF (msg) {
+    const uuid = msg.uuid;
+    const xpath = msg.xpath;
+    if (uuid === _uuid_ ) {
+        invokeCtlFromXPath (xpath);
+        /*
+        function simulateKeyPress () {
+            let evt = new KeyboardEvent("keydown", {
+                key: "r",
+                code: "KeyR",
+                keyCode: 82,
+                which: 82,
+                bubbles: true,
+                cancelable: true
+            });
+            document.dispatchEvent(evt);
+        }
+        let script = document.createElement('script');
+        script.textContent = `(${simulateKeyPress.toString()})();`;
+        document.documentElement.appendChild(script);
+        script.remove ();
+        */
+    } // end if(uuid === _uuid_ )
+} // end doRemixF
+
+function getElementByXPath (xpath) {
+    let ret = null;
+    const elem = document.evaluate(
+        xpath,
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+    );
+    if (elem.singleNodeValue) {
+        ret = elem.singleNodeValue;
+    }
+    return ret;
+} // end getElementByXPath
+
+function invokeCtlFromXPath (xpath) {
+    const ctl = getElementByXPath(xpath);
+    if (ctl) {
+        ctl.click();
+    }
+} // end invokeCtlFromXPath
+
+function getValueFromXPath(xpath) {
+    let ret = '';
+    const result = getElementByXPath(xpath);
+    if (result) {
+        ret = result.textContent.trim();
+    }
+    return ret;
+} // end getValueFromXPath
+
+function parseBody () {
+    // Send message to background script to initiate video remix.
+    const resolutionW = getValueFromXPath(resolution_xpath);
+    const durationW = getValueFromXPath(duration_xpath);
+    const promptW = getValueFromXPath(prompt_xpath);
+    const videoTitleW = _uuid_ = getValueFromXPath(videoName_xpath);
+    if (resolutionW === '')
+        return;
+    clearInterval (intID);
+    // Init bg listener
+    port.postMessage ({
+        action: 'videoFound',
+        uuid: videoTitleW,
+        videoTitle: videoTitleW,
+        resolution: resolutionW,
+        duration: durationW,
+        prompt: promptW
+    });
+} // end parseBody
+/*
+function Init () {
+    if ((document.readyState != 'complete') || getValueFromXPath(resolution_xpath) === '')
+        return;
+    clearInterval (intID);
+    document.addEventListener('DOMContentLoaded', parseBody);
+} // end Init
+ */
+let intID = setInterval(parseBody, false);
+
+/*
+// Run initialization based on document state
+if (document.readyState !== 'complete') {
+    document.addEventListener('DOMContentLoaded', parseBody);
+} else {
+    // If DOM is already loaded
+    parseBody();
+} // end if (document.readyState === 'loading')
+
+/*
 (function() {
   // Wait for the DOM to load or video element to be ready
   window.addEventListener('DOMContentLoaded', () => {
@@ -46,6 +192,7 @@
       bitrate: bitrateText
     });
     // The background script will handle the rest (download and upload).
-    */
+    * /
   });
 })();
+*/
