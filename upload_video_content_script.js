@@ -1,6 +1,8 @@
 
+const port = chrome.runtime.connect ();
+
 // youtubeContent.js (runs on YouTube upload page)
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+port.onMessage.addListener(async (message, sender, sendResponse) => {
   if (message.action === 'startUpload') {
     const { videoTitle, videoSizeText, videoUrl } = message;
     console.log('Received video upload request for:', videoTitle);
