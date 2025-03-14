@@ -6,9 +6,9 @@ const textarea_input_xpath = "//*[@id=\"yDmH0d\"]/c-wiz/div/div[2]/c-wiz/div[2]/
 const textarea_translation_xpath = "//*[@id=\"yDmH0d\"]/c-wiz/div/div[2]/c-wiz/div[2]/c-wiz/div[1]/div[2]/div[2]/c-wiz/div/div[6]/div/div[1]/span[1]/span/span";
 const detected_language_xpath = "//*[@id=\"c58\"]/span[1]";
 
+let taskQueue = [];
 let callbackID = null
 let siteReadyFlag = false;
-let taskQueue = [];
 
 const port = chrome.runtime.connect ();
 port.onMessage.addListener((message, sender, sendResponse) => {
