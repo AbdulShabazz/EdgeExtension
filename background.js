@@ -1,7 +1,7 @@
 
 // background.js (runs as a service worker in Edge/Chrome extension)
 
-let InprocessInt64 = 0;
+let InprocessQueue = [];
 let totalLikesInt64 = new Set ();
 
 function generateVideo (details) {
@@ -21,83 +21,149 @@ function openTab (url) {
     chrome.tabs.create({ url: url, active: false }, tab => {
         tab;
     });
-} // end openTab 
+} // end openTab
 
-function preEvaluateVideo (msg) {
+function preEvaluateVideo () {
     //const dataIndex = msg.element.getAttribute('data-index');
-    if (updateLikes (msg.dataIndex)) {
+    if (InprocessQueue.length < 1)
+        return;
+    const msg = InprocessQueue.shift ();
+    if (updateLikes (msg?.dataIndex)) {
         openTab (msg.url);
     }
-} // end generateVideo
+} // end preEvaluateVideo
+
+function calcResolutionAndDuration (res,dur) {
+    let status = 'skip';
+    let resolution = 720;
+    let duration = 5;
+    let remix = 0; // remix strength [0,7]
+    const temp_resInt64 = new Number (res.replace(/[sp]/g,''));
+    const temp_durInt64 = new Number (dur.replace(/[sp]/g,''));
+    if (temp_durInt64 > 15) {
+        return { status, resolution, duration, remix };
+    }
+    status = 'continue';
+    if (temp_durInt64 < 6 ) {
+        resolution = 720;
+        duration = 5;
+        remix = (temp_resInt64 > 480) ? 0 /* none */: 3 /* mild */ ;
+    }
+    else if (temp_durInt64 > 5 ) {
+        resolution = 480;
+        duration = -1;
+        remix = (temp_resInt64 > 480) ? 0 /* none */: 3 /* mild */ ;
+    }
+    return { status, resolution, duration, remix };
+} // end getResolutionAndDuration
+
+function stripSymbols (promptW) {
+    const prompt = promptW
+      .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF\u2190-\u21FF\u2500-\u257F\u2B50-\u2BFF\uFE0F]/gu, '')
+      .replace(/\s+/g, ' ');
+    return prompt;
+} // end stripSymbols
 
 // Listen for one-time messages from content scripts&#8203;:contentReference[oaicite:13]{index=13}.
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  switch (message.action) {
-      case 'DataIndexElementClicked':
-          preEvaluateVideo (message);
-          break;
-      case 'NewDataIndexElementsFound':
-        break;
-      case 'videoFound':
-          break;
-  } // end switch (message.action)
-  
-  if (message.action === 'videoFound') {
-    /*
-    const videoUrl = message.url;
-    let videoTitle = message.title || 'Video';
-    if (!videoTitle.toLowerCase().endsWith('.mp4')) {
-      videoTitle += '.mp4';  // ensure the filename has .mp4 extension
-    }
+chrome.runtime.onConnect.addListener ((port) => {
+    port.onMessage.addListener((message, sender, sendResponse) => {
+        switch (message.action) {
+            case 'NewDataIndexElementsFound':
+              ;;
+            break;
 
-    //console.log('Downloading video:', videoUrl);
-    // Initiate download of the video file using the Downloads API&#8203;:contentReference[oaicite:14]{index=14}.
-    /*
-    chrome.downloads.download({
-      url: videoUrl,
-      filename: videoTitle,   // Save as this name in the user's Downloads folder
-      saveAs: false           // No Save As dialog, download automatically
-    }, downloadId => {
-      if (chrome.runtime.lastError || !downloadId) {
-        console.error('Download failed:', chrome.runtime.lastError);
-      } else {
-        // Monitor the download until it’s complete.
-        chrome.downloads.onChanged.addListener(function onChanged(delta) {
-          if (delta.id === downloadId && delta.state && delta.state.current === 'complete') {
-            // Download is complete&#8203;:contentReference[oaicite:15]{index=15}.
-            chrome.downloads.onChanged.removeListener(onChanged);
-            console.log('Video downloaded. Preparing to upload to YouTube.');
+            case 'DataIndexElementClicked':
+            InprocessQueue.push (message);
+            break;
 
-            // Get the file size from the download item
-            chrome.downloads.search({ id: downloadId }, function(results) {
-              let fileSizeBytes = results && results[0] ? results[0].fileSize : 0;
-              let fileSizeMB = fileSizeBytes ? (fileSizeBytes / (1024*1024)).toFixed(2) + ' MB' : '';
-              
-              // Find an open YouTube tab.
-              chrome.tabs.query({ url: "*://*.youtube.com/*" }, function(tabs) {
-                if (tabs.length === 0) {
-                  console.warn('No open YouTube tab found. Opening a new one.');
-                  chrome.tabs.create({ url: "https://www.youtube.com/upload", active: true }, tab => {
-                    sendUploadMessageWhenReady(tab.id, videoTitle, fileSizeMB, videoUrl);
-                  });
-                } else {
-                  // Use the first YouTube tab found (could refine to specific tab if needed).
-                  let ytTab = tabs[0];
-                  // Navigate it to the upload page (if not already there).
-                  chrome.tabs.update(ytTab.id, { url: "https://www.youtube.com/upload", active: true }, updatedTab => {
-                    sendUploadMessageWhenReady(updatedTab.id, videoTitle, fileSizeMB, videoUrl);
+            case 'videoFound':
+            const uuid = message.uuid;
+            const tmpResolutionW = message.resolution;
+            const tmpDurationW = message.duration;
+            const tmpPrompt = message.prompt;
+            const videoTitleW = message.videoTitle;
+            const prompt = stripSymbols(tmpPrompt);
+            const { status, resolution, duration, remix } = calcResolutionAndDuration (tmpResolutionW, tmpDurationW);
+            if (status === 'continue') {
+                port.postMessage({
+                    action:"doRemix",
+                    uuid: uuid,
+                    resolution: resolution,
+                    duration: duration,
+                    remix: remix
+                });
+                // wait for video [body] to generate ...
+                // add to Favorites
+                // get video title
+                // d/l [video].mp4
+                // get/create translate tab: extract English translation
+                // d/l [video].log (title + english prompt [+ prompt])
+            } // end if (status === 'continue')
+            break;
+        } // end switch (message.action)
+
+        // Periodically check for new videos (small overhead)
+        setInterval(preEvaluateVideo, 10);
+
+        /*
+        if (message.action === 'videoFound') {
+          /*
+          const videoUrl = message.url;
+          let videoTitle = message.title || 'Video';
+          if (!videoTitle.toLowerCase().endsWith('.mp4')) {
+            videoTitle += '.mp4';  // ensure the filename has .mp4 extension
+          }
+
+          //console.log('Downloading video:', videoUrl);
+          // Initiate download of the video file using the Downloads API&#8203;:contentReference[oaicite:14]{index=14}.
+          /*
+          chrome.downloads.download({
+            url: videoUrl,
+            filename: videoTitle,   // Save as this name in the user's Downloads folder
+            saveAs: false           // No Save As dialog, download automatically
+          }, downloadId => {
+            if (chrome.runtime.lastError || !downloadId) {
+              console.error('Download failed:', chrome.runtime.lastError);
+            } else {
+              // Monitor the download until it’s complete.
+              chrome.downloads.onChanged.addListener(function onChanged(delta) {
+                if (delta.id === downloadId && delta.state && delta.state.current === 'complete') {
+                  // Download is complete&#8203;:contentReference[oaicite:15]{index=15}.
+                  chrome.downloads.onChanged.removeListener(onChanged);
+                  console.log('Video downloaded. Preparing to upload to YouTube.');
+
+                  // Get the file size from the download item
+                  chrome.downloads.search({ id: downloadId }, function(results) {
+                    let fileSizeBytes = results && results[0] ? results[0].fileSize : 0;
+                    let fileSizeMB = fileSizeBytes ? (fileSizeBytes / (1024*1024)).toFixed(2) + ' MB' : '';
+
+                    // Find an open YouTube tab.
+                    chrome.tabs.query({ url: "*://*.youtube.com/*" }, function(tabs) {
+                      if (tabs.length === 0) {
+                        console.warn('No open YouTube tab found. Opening a new one.');
+                        chrome.tabs.create({ url: "https://www.youtube.com/upload", active: true }, tab => {
+                          sendUploadMessageWhenReady(tab.id, videoTitle, fileSizeMB, videoUrl);
+                        });
+                      } else {
+                        // Use the first YouTube tab found (could refine to specific tab if needed).
+                        let ytTab = tabs[0];
+                        // Navigate it to the upload page (if not already there).
+                        chrome.tabs.update(ytTab.id, { url: "https://www.youtube.com/upload", active: true }, updatedTab => {
+                          sendUploadMessageWhenReady(updatedTab.id, videoTitle, fileSizeMB, videoUrl);
+                        });
+                      }
+                    });
                   });
                 }
               });
-            });
-          }
-        });
-      }
+            }
+          });
+        * /
+        }
+        */
+        // Return true to indicate we'll send a response asynchronously (if needed).
+        return true;
     });
-  */
-  }
-  // Return true to indicate we'll send a response asynchronously (if needed).
-  return true;
 });
 
 // Helper function to message the YouTube content script once the upload page is loaded.
