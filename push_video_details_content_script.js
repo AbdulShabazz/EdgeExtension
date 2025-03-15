@@ -153,7 +153,7 @@ function doDownload () {
 
 function setResolution (msg) {
     //let resolution_button = document.querySelector('[aria-controls="radix-:rb:"]'); // resolution button
-    observeDOMForNewElement ('[aria-controls="radix-:rb:"]', // '[aria-controls="radix-:34:"]'
+    observeDOMForNewElement ('[aria-controls="radix-:rb:"]', // or '[aria-controls="radix-:34:"]'
     (resolution_button) => {
         resolution_button.click ();
         switch (msg.resolution) {
@@ -170,7 +170,7 @@ function setResolution (msg) {
 
 function setTotalNewVideos (msg) {
     //let total_videos_button = document.querySelector('[aria-controls="radix-:rf:"]'); // total new videos button
-    observeDOMForNewElement ('[aria-controls="radix-:rf:"]', // '[aria-controls="radix-:36:"]'
+    observeDOMForNewElement ('[aria-controls="radix-:rf:"]', // or '[aria-controls="radix-:36:"]'
     (total_videos_button) => {
         total_videos_button.click ();
         clickAboveElement (total_videos_button, '100px');
@@ -179,7 +179,7 @@ function setTotalNewVideos (msg) {
 
 function setRemixStrength (msg) {
     //let remix_strength_button = document.querySelector('[aria-controls="radix-:rd:"]'); // remix strength button
-    observeDOMForNewElement ('[aria-controls="radix-:rd:"]', // '[aria-controls="radix-:38:"]' 
+    observeDOMForNewElement ('[aria-controls="radix-:rd:"]', // or '[aria-controls="radix-:38:"]' 
     (remix_strength_button) => {
         remix_strength_button.click ();
         switch (msg.remix) {
