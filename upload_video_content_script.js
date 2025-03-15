@@ -1,5 +1,5 @@
 
-const port = chrome.runtime.connect ();
+const port = chrome.runtime.connect ({ name: "youtube-upload" });
 
 // youtubeContent.js (runs on YouTube upload page)
 port.onMessage.addListener(async (message, sender, sendResponse) => {
