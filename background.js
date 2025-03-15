@@ -1,6 +1,8 @@
 
 // background.js (runs as a service worker in Edge/Chrome extension)
 
+let buffer = [];
+let uploadQueue = [];
 let activePorts = {};
 let InprocessQueue = [];
 let totalLikesInt64 = new Set ();
@@ -69,49 +71,72 @@ function stripSymbols (promptW) {
 } // end stripSymbols
 
 function downloadLog (msg) {
-    const fileTitle = `${message.title.replace (/\s/g, '_')}.log`;
-    let f = new Blob ();
-    chrome.downloads.download({
+    const totalVideosInt64 = totalLikesInt64.length;
+    const fileTitle = `${totalVideosInt64}-${message.videoTitle.replace(/[\W\s]/g, '_')}.log`;
+    const fileContents = JSON.stringify (message, null, 2);
+    const blob = new Blob ([fileContents], { type: 'application/json' });
+    const videoUrl = URL.createObjectURL (blob);
+    chrome.downloads.download ({
         url: videoUrl,
-        filename: videoTitle,   // Save as this name in the user's Downloads folder
+        filename: fileTitle,   // Save as this name in the user's Downloads folder
         saveAs: false           // No Save As dialog, download automatically
-    }, downloadId => {
+    }, (downloadId) => {
       if (chrome.runtime.lastError || !downloadId) {
           console.error('Download failed:', chrome.runtime.lastError);
       } else {
-          // Monitor the download until it’s complete.
-          chrome.downloads.onChanged.addListener(function onChanged(delta) {
-              if (delta.id === downloadId && delta.state && delta.state.current === 'complete') {
-                  // Download is complete&#8203;:contentReference[oaicite:15]{index=15}.
-                  chrome.downloads.onChanged.removeListener(onChanged);
-                  console.log('Video .log downloaded.');
+            // Monitor the download until it’s complete.
+            chrome.downloads.onChanged.addListener(function onChanged(delta) {
+                if (delta.id === downloadId && delta.state && delta.state.current === 'complete') {
+                    // Download is complete&#8203;:contentReference[oaicite:15]{index=15}.
+                    chrome.downloads.onChanged.removeListener(onChanged);
+                    console.info (`${totalVideosInt64}. video log downloaded.`);
+                    /*
+                    // Get the file size from the download item
+                    chrome.downloads.search({ id: downloadId }, function(results) {
+                        let fileSizeBytes = results && results[0] ? results[0].fileSize : 0;
+                        let fileSizeMB = fileSizeBytes ? (fileSizeBytes / (1024*1024)).toFixed(2) + ' MB' : '';
+                        
+                        // Find an open YouTube tab.
+                        chrome.tabs.query({ url: "*://*.youtube.com/*" }, function(tabs) {
+                            if (tabs.length === 0) {
+                                console.warn('No open YouTube tab found. Opening a new one.');
+                                openTab({ url: "https://www.youtube.com/upload" });
+                            } else {
+                                // Use the first YouTube tab found (could refine to specific tab if needed).
+                                let ytTab = tabs[0];
+                                // Navigate it to the upload page (if not already there).
+                                chrome.tabs.update(ytTab.id, { url: "https://www.youtube.com/upload", active: false }, 
+                                updatedTab => {
+                                    ;;
+                                });
+                            }
+                        });
+                    });
+                    */
+                } // end if (delta.id === downloadId ... )
+            }); // end chrome.downloads.onChanged.addListener
+            // cleanup url //
+            setTimeout (() => {URL.revokeObjectURL(videoUrl)});
+        } // end if/else
+    }); // end chrome.downloads.download
+} // end downloadLog
 
-                  // Get the file size from the download item
-                  chrome.downloads.search({ id: downloadId }, function(results) {
-                      let fileSizeBytes = results && results[0] ? results[0].fileSize : 0;
-                      let fileSizeMB = fileSizeBytes ? (fileSizeBytes / (1024*1024)).toFixed(2) + ' MB' : '';
-                      
-                      // Find an open YouTube tab.
-                      chrome.tabs.query({ url: "*://*.youtube.com/*" }, function(tabs) {
-                          if (tabs.length === 0) {
-                              console.warn('No open YouTube tab found. Opening a new one.');
-                              openTab({ url: "https://www.youtube.com/upload" });
-                          } else {
-                              // Use the first YouTube tab found (could refine to specific tab if needed).
-                              let ytTab = tabs[0];
-                              // Navigate it to the upload page (if not already there).
-                              chrome.tabs.update(ytTab.id, { url: "https://www.youtube.com/upload", active: false }, 
-                              updatedTab => {
-                                  ;;
-                              });
-                          }
-                      });
-                  });
-              }
-          });
+function findTabByURL (url, allowNewTab = true, cb) {
+    let ret = false;
+    chrome.tabs.query({ url: urlSearch }, function(tabs) {
+        if ((tabs.length === 0) && allowNewTab) {
+            console.warn('No open translate tab found. Opening a new one.');
+            openTab (url); // open tab in the bg
+        } else {
+            // Use the first translate tab found
+            const translateTab = tabs[0];
+            // Navigate it to the translate page (if not already there)
+            cb (translateTab);
+            ret = true;
         }
     });
-} // end downloadLog
+    return ret;
+} // end findTabByURL
 
 function standardizeEnglishPrompt (message) {
     // Find an open YouTube tab.
@@ -135,8 +160,6 @@ function standardizeEnglishPrompt (message) {
         }
     });
 } // end standardizePrompt
-
-let buffer = [];
 
 // Listen for one-time messages from content scripts&#8203;:contentReference[oaicite:13]{index=13}.
 chrome.runtime.onConnect.addListener ((port) => {
@@ -171,24 +194,50 @@ chrome.runtime.onConnect.addListener ((port) => {
                 const videoTitleW = message.videoTitle;
                 const prompt = message.prompt;
                 const { status, resolution, duration, remix } = calcResolutionAndDuration (tmpResolutionW, tmpDurationW);
+                const msg_body = {
+                    action: "doRemix",
+                    uuid: uuid,
+                    title: videoTitleW,
+                    prompt: prompt,
+                    resolution: resolution,
+                    duration: duration,
+                    remix: remix
+                };
+                const msg_upload_body = {
+                    action: "startUpload",
+                    uuid: uuid,
+                    title: videoTitleW,
+                    prompt: prompt,
+                    resolution: resolution,
+                    duration: duration,
+                    remix: remix
+                };
+                uploadQueue.push (msg_upload_body);
                 if (status == 'continue') {
-                    activePorts['video-details'].postMessage({
-                        action: "doRemix",
-                        uuid: uuid,
-                        title: videoTitleW,
-                        prompt: prompt,
-                        resolution: resolution,
-                        duration: duration,
-                        remix: remix
-                    });
+                    activePorts['video-details'].postMessage(msg_body);
                 } // end if (status === 'continue')
+                break;
+
+                case 'url-navigate':
+                const i = Math.max (uploadQueue.length-1,0);
+                const msg = uploadQueue[i];
+                const url = message.url;
+                const urlSearch = message.urlSearch;
+                chrome.tabs.query ({ url:urlSearch }, (tabs) => {
+                    tabs.forEach (tab => {
+                        if (tab.id) {
+                            chrome.tabs.update (tab.id, { url:url });
+                        }
+                    });
+                });
+                activePorts['youtube-upload'].postMessage (msg);
                 break;
 
                 case 'downloadCompleted':
                 chrome.tabs.query ({ url:message.url }, (tabs) => {
                     tabs.forEach (tab => {
                         if (tab.id) {
-                            chrome.tabs.remove (tab.id);
+                            chrome.tabs.update (tab.id, { url:'https://www.youtube.com/upload' });
                         }
                     });
                 });
