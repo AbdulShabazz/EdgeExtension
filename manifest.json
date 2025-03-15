@@ -10,9 +10,10 @@
   ],
   "host_permissions": [
     "https://sora.com/g/*",
+    "https://sora.com/t/",
     "https://sora.com/explore/recent/*",
     "https://translate.google.com/*",
-    "https://studio.youtube.com/*"
+    "https://*.youtube.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -31,7 +32,7 @@
       "js": ["push_video_details_content_script.js"]
     },
     {
-      "matches": ["https://studio.youtube.com/*"],
+      "matches": ["https://*.youtube.com/*"],
       "js": ["upload_video_content_script.js"]
     }
   ],
