@@ -1,8 +1,12 @@
 
 // background.js (runs as a service worker in Edge/Chrome extension)
 
+let activePorts = {};
 let InprocessQueue = [];
 let totalLikesInt64 = new Set ();
+
+chrome.alarms.create("keepAlive", { periodInMinutes: 1 });
+chrome.alarms.onAlarm.addListener ((alarm) => {});
 
 function generateVideo (details) {
 
@@ -47,12 +51,12 @@ function calcResolutionAndDuration (res,dur) {
     if (temp_durInt64 < 6 ) {
         resolution = 720;
         duration = 5;
-        remix = (temp_resInt64 > 480) ? 0 /* none */: 3 /* mild */ ;
+        remix = (temp_resInt64 > 480) ? 0 /* none */: 4 /* mild */ ;
     }
     else if (temp_durInt64 > 5 ) {
         resolution = 480;
         duration = -1;
-        remix = (temp_resInt64 > 480) ? 0 /* none */: 3 /* mild */ ;
+        remix = (temp_resInt64 > 480) ? 0 /* none */: 4 /* mild */ ;
     }
     return { status, resolution, duration, remix };
 } // end getResolutionAndDuration
@@ -136,6 +140,7 @@ let buffer = [];
 
 // Listen for one-time messages from content scripts&#8203;:contentReference[oaicite:13]{index=13}.
 chrome.runtime.onConnect.addListener ((port) => {
+    activePorts[port.name] = port;  // Maintain a reference to keep the port open
     port.onMessage.addListener((message, sender, sendResponse) => {
         try {
             switch (message.action) {
@@ -156,7 +161,7 @@ chrome.runtime.onConnect.addListener ((port) => {
                 break;
 
                 case 'translateSiteReady':
-                port.postMessage (buffer.shift());
+                activePorts['google-translate'].postMessage (buffer.shift());
                 break;
 
                 case 'EnglishPromptCompleted':
@@ -166,9 +171,9 @@ chrome.runtime.onConnect.addListener ((port) => {
                 const videoTitleW = message.videoTitle;
                 const prompt = message.prompt;
                 const { status, resolution, duration, remix } = calcResolutionAndDuration (tmpResolutionW, tmpDurationW);
-                if (status === 'continue') {
-                    port.postMessage({
-                        action:"doRemix",
+                if (status == 'continue') {
+                    activePorts['video-details'].postMessage({
+                        action: "doRemix",
                         uuid: uuid,
                         title: videoTitleW,
                         prompt: prompt,
@@ -193,13 +198,16 @@ chrome.runtime.onConnect.addListener ((port) => {
 
             // Periodically check for new videos (small overhead)
             setInterval(preEvaluateVideo, 1);
-            // Return true to indicate we'll send a response asynchronously (if needed).
-            return true;
         }
         catch (e) {
           
         } // end try/catch
+        // Return true to indicate we'll send a response asynchronously (if needed).
+        return true;
     }); // end port.onMessage.addListener
+    port.onDisconnect.addListener (() => {
+        console.info ('background.js connection to background service worker port, disconnected.')
+    }); // end port.onDisconnect
 }); // end chrome.runtime.onConnect
 
 // Helper function to message the YouTube content script once the upload page is loaded.
