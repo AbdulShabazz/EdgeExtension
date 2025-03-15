@@ -1,6 +1,6 @@
 
 // Content script for Microsoft Edge extension
-const port = chrome.runtime.connect ();
+const port = chrome.runtime.connect ({ name: "recent-videos" });
 
 // Function to query all elements with data-index and report them
 function queryHTMLElements() {
