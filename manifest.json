@@ -5,6 +5,7 @@
   "description": "Auto-download videos from video-gens.com and upload to YouTube.",
   "permissions": [
     "downloads",
+    "alarms",
     "tabs"
   ],
   "host_permissions": [
