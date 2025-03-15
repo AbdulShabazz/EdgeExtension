@@ -1,8 +1,17 @@
 
-const port = chrome.runtime.connect ({ name: "youtube-upload" });
 
 // youtubeContent.js (runs on YouTube upload page)
-port.onMessage.addListener(async (message, sender, sendResponse) => {
+//port.onMessage.addListener(async (message, sender, sendResponse) => {
+const port = chrome.runtime.connect ({ name: "youtube-upload" });
+port.onMessage.addListener((message, sender, sendResponse) => {
+    switch (message.action) {
+        case 'startUpload':
+        break;
+
+        case 'completeDownload':
+        break;
+    }
+  /*
   if (message.action === 'startUpload') {
     const { videoTitle, videoSizeText, videoUrl } = message;
     console.log('Received video upload request for:', videoTitle);
@@ -48,4 +57,27 @@ port.onMessage.addListener(async (message, sender, sendResponse) => {
       console.error('Upload automation failed:', err);
     }
   }
-});
+    */
+   return true;
+}); // end port.onMessage.addListener
+
+function Init () {
+    /*
+    let isOnYT = document.location.href.match (/^*\.youtube\.com\/*$/);
+    let isOnSORA = document.location.href.match (/^*\.sora\.com\/t\/*$/);
+    if (isOnSORA) {
+        port.postMessage
+    } 
+    else if (isOnYT) {
+
+    }
+    */
+
+    // 1. We should be at (*.sora.com/t/*)
+    // 2. Navigate to the newly generated video (*.sora.com/g/*)
+    const urlSearch = document.location.href;
+    const url = document.location.href.replace (/\/t\//, '/g/');
+    port.postMessage ({ action: "url-navigate", url: url, urlSearch: urlSearch });
+} // end Init
+
+Init ();

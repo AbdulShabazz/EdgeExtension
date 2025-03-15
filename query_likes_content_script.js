@@ -113,6 +113,7 @@ function parseBody () {
     }); // end observer.observe (...)
   
     console.log('Data index element tracker initialized');
+
 } // end parseBody
 
 // Run initialization based on document state
