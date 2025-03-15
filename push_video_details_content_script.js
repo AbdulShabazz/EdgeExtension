@@ -1,7 +1,10 @@
 
+// globals
+let _uuid_ = "";
+
 // content.js (runs on video-gens.com pages)
 
-const port = chrome.runtime.connect ();
+const port = chrome.runtime.connect ({ name: "video-details" });
 port.onMessage.addListener((message, sender, sendResponse) => {
     switch (message.action) {
         case 'doRemix':
@@ -16,9 +19,9 @@ port.onMessage.addListener((message, sender, sendResponse) => {
         break;
     }
 });
-
-// globals
-let _uuid_ = "";
+port.onDisconnect.addListener (() => {
+    console.info ('push_video_details_content_script.js connection to background service worker port, disconnected.')
+});
 
 // Video Details
 const videoName_xpath = "/html/body/main/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div[3]/div"; // name
@@ -81,14 +84,17 @@ function clickAboveElement(element, pixelsAbove = 12) {
     // Dispatch the event at the calculated position
     document.elementFromPoint(x, y)?.dispatchEvent(clickEvent);
 
-    /*
-    // Usage example //
-    const element = document.getElementById('my-element');
-    // Click 5px above the element //
-    clickAboveElement(element, 5);
-    */
-
 } // end clickAboveElement
+
+/*
+
+// Usage example //
+const element = document.getElementById('my-element');
+
+// Click 5px above the element //
+clickAboveElement(element, 5);
+
+*/
 
 // Shortcut keys + keyCodes
 
@@ -113,23 +119,6 @@ function simulateKeyPress (key, keyCode) {
         cancelable: true
     });
     document.dispatchEvent(evt);
-    /*
-    function simulateKeyPress () {
-        let evt = new KeyboardEvent("keydown", {
-            key: "r",
-            code: "KeyR",
-            keyCode: 82,
-            which: 82,
-            bubbles: true,
-            cancelable: true
-        });
-        document.dispatchEvent(evt);
-    }
-    let script = document.createElement('script');
-    script.textContent = `(${simulateKeyPress.toString()})();`;
-    document.documentElement.appendChild(script);
-    script.remove ();
-    */
 } // end simulateKeyPress
 
 let downloadID = null;
@@ -142,12 +131,95 @@ function confirmDownloadFromXPath () {
             url: window.location.href
         });
     };
-}
+} // end confirmDownloadFromXPath
+
+// Observes when the element first appears in the DOM
+function observeDOMForNewElement(selector, callback) {
+    const observer = new MutationObserver(() => {
+        const element = document.querySelector(selector);
+        if (element) {
+            observer.disconnect(); // Stop observing once the element appears
+            callback(element);
+        }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+} // end observeDOMForNewElement
 
 function doDownload () {
     simulateKeyPress ("d");
     downloadID = setInterval (confirmDownloadFromXPath, 1);
 } // end doDownload
+
+function setResolution (msg) {
+    //let resolution_button = document.querySelector('[aria-controls="radix-:rb:"]'); // resolution button
+    observeDOMForNewElement ('[aria-controls="radix-:rb:"]', // '[aria-controls="radix-:34:"]'
+    (resolution_button) => {
+        resolution_button.click ();
+        switch (msg.resolution) {
+            case 480:
+            clickAboveElement (resolution_button, '100px');
+            break;
+    
+            case 720:
+            clickAboveElement (resolution_button, '150px');
+            break;
+        } // end switch (msg.resolution)
+    })
+} // end setResolution
+
+function setTotalNewVideos (msg) {
+    //let total_videos_button = document.querySelector('[aria-controls="radix-:rf:"]'); // total new videos button
+    observeDOMForNewElement ('[aria-controls="radix-:rf:"]', // '[aria-controls="radix-:36:"]'
+    (total_videos_button) => {
+        total_videos_button.click ();
+        clickAboveElement (total_videos_button, '100px');
+    });
+} // end setTotalnewVideos
+
+function setRemixStrength (msg) {
+    //let remix_strength_button = document.querySelector('[aria-controls="radix-:rd:"]'); // remix strength button
+    observeDOMForNewElement ('[aria-controls="radix-:rd:"]', // '[aria-controls="radix-:38:"]' 
+    (remix_strength_button) => {
+        remix_strength_button.click ();
+        switch (msg.remix) {
+            case 7:
+            clickAboveElement (remix_strength_button, '100px');
+            break;
+    
+            case 'strong': // 6
+            case 6:
+            clickAboveElement (remix_strength_button, '250px');
+            break;
+    
+            case 5:
+            clickAboveElement (remix_strength_button, '100px');
+            break;
+    
+            case 'mild': // 4
+            case 4:
+            clickAboveElement (remix_strength_button, '200px');
+            break;
+    
+            case 3:
+            clickAboveElement (remix_strength_button, '100px');
+            break;
+    
+            case 'subtle': // 2
+            case 2:
+            clickAboveElement (remix_strength_button, '150px');
+            break;
+    
+            case 1:
+            clickAboveElement (remix_strength_button, '100px');
+            break;
+    
+            case 0:
+            clickAboveElement (remix_strength_button, '100px');
+            break;
+        } // end switch (msg.resolution) 
+    });
+} // end setRemixStrength
 
 function doRemixF (msg) {
     const uuid = msg.uuid;
@@ -156,7 +228,10 @@ function doRemixF (msg) {
         const resolution = msg.resolution;
         const duration = msg.duration;
         const remix = msg.remix;
-        invokeCtlFromXPath (xpath); // set focus remix.click ()
+        invokeCtlFromXPath (xpath); // set focus remix_window.click ()
+        setResolution (msg);
+        setTotalNewVideos(msg);
+        setRemixStrength (msg);
         // generate video ...
         // wait for video [body] to generate ...
         // navigate to new video url
@@ -167,6 +242,7 @@ function doRemixF (msg) {
         /*
         // close window
         port.postMessage ({
+            //action:"videoCompleted",
             action:"downloadCompleted",
             uuid: uuid,
             title: newVideoTitleW,
@@ -178,6 +254,94 @@ function doRemixF (msg) {
         */
     } // end if(uuid === _uuid_ )
 } // end doRemixF
+
+/**
+ * Triggers a mouse click event at a specified distance above an HTML element
+ * @param {HTMLElement|string} element - The target element or its CSS selector
+ * @param {number} pixelsAbove - The number of pixels above the element to click
+ * @return {boolean} - True if successful, false otherwise
+ */
+function clickAboveElement(element, _pixelsAbove_) {
+    const pixelsAbove = new Number (_pixelsAbove_.toString().replace(/\D+/g,''));
+    try {
+      // If a selector string is provided, get the actual element
+      if (typeof element === 'string') {
+        element = document.querySelector(element);
+      }
+      
+      // Check if element exists
+      if (!element) {
+        console.error('Element not found');
+        return false;
+      }
+      
+      // Get the element's position relative to the viewport
+      const rect = element.getBoundingClientRect();
+      
+      // Calculate the target coordinates
+      // Using the horizontal center of the element
+      const x = rect.left + (rect.width / 2);
+      // Using the specified distance above the top of the element
+      const y = rect.top - pixelsAbove;
+      
+      // Add scroll position to get absolute page coordinates
+      const absoluteX = x + window.scrollX;
+      const absoluteY = y + window.scrollY;
+      
+      // Create and dispatch mousedown event
+      const mousedownEvent = new MouseEvent('mousedown', {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        clientX: x,
+        clientY: y,
+        screenX: absoluteX,
+        screenY: absoluteY
+      });
+      document.elementFromPoint(x, y)?.dispatchEvent(mousedownEvent);
+      
+      // Create and dispatch mouseup event
+      const mouseupEvent = new MouseEvent('mouseup', {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        clientX: x,
+        clientY: y,
+        screenX: absoluteX,
+        screenY: absoluteY
+      });
+      document.elementFromPoint(x, y)?.dispatchEvent(mouseupEvent);
+      
+      // Create and dispatch click event
+      const clickEvent = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        clientX: x,
+        clientY: y,
+        screenX: absoluteX,
+        screenY: absoluteY
+      });
+      
+      // Dispatch to the element at those coordinates
+      const targetElement = document.elementFromPoint(x, y);
+      if (targetElement) {
+        targetElement.dispatchEvent(clickEvent);
+        console.log(`Click triggered ${pixelsAbove}px above element at coordinates: (${x}, ${y})`);
+        return true;
+      } else {
+        console.error('No element found at the target coordinates');
+        return false;
+      }
+    } catch (error) {
+      console.error('Error triggering click:', error);
+      return false;
+    }
+} // end clickAboveElement
+
+// Example usage:
+// clickAboveElement('#myButton', 30); // Click 30px above the element with id="myButton"
+// clickAboveElement(document.getElementById('dropdown'), "50px"); // Click 50px above the dropdown element
 
 function getElementByXPath (xpath) {
     let ret = null;
@@ -237,73 +401,5 @@ function parseBody () {
         prompt: promptW
     });
 } // end parseBody
-/*
-function Init () {
-    if ((document.readyState != 'complete') || getValueFromXPath(resolution_xpath) === '')
-        return;
-    clearInterval (intID);
-    document.addEventListener('DOMContentLoaded', parseBody);
-} // end Init
- */
+
 let intID = setInterval(parseBody, false);
-
-/*
-// Run initialization based on document state
-if (document.readyState !== 'complete') {
-    document.addEventListener('DOMContentLoaded', parseBody);
-} else {
-    // If DOM is already loaded
-    parseBody();
-} // end if (document.readyState === 'loading')
-
-/*
-(function() {
-  // Wait for the DOM to load or video element to be ready
-  window.addEventListener('DOMContentLoaded', () => {
-    /*
-    const videoElem = document.querySelector('video');
-    if (!videoElem) return;  // No video element found
-
-    // Get video source URL
-    let videoUrl = videoElem.currentSrc || videoElem.src;
-    if (!videoUrl) {
-      // If video source not directly in <video>, check for <source> tag
-      const source = videoElem.querySelector('source');
-      if (source) videoUrl = source.src;
-    }
-    if (!videoUrl) {
-      console.warn('No video URL found on video-gens page.');
-      return;
-    }
-
-    // Extract video title/name. Use page title or filename as a fallback.
-    let videoTitle = document.title || 'video';
-    // Optional: sanitize title to use as filename (remove illegal characters)
-    videoTitle = videoTitle.replace(/[^A-Za-z0-9 _.-]/g, '_');
-
-    // Extract encoding metadata if available
-    let resolutionText = '';
-    if (videoElem.videoWidth && videoElem.videoHeight) {
-      resolutionText = `${videoElem.videoWidth}x${videoElem.videoHeight}`;  // e.g. "1920x1080"
-    }
-    // Suppose the page has bitrate info in an element with id "bitrate"
-    let bitrateText = '';
-    const bitrateElem = document.querySelector('#bitrate');
-    if (bitrateElem) {
-      bitrateText = bitrateElem.innerText.trim();  // e.g. "Bitrate: 5000 kbps"
-    }
-
-    console.log(`Detected video: ${videoUrl}, resolution: ${resolutionText}, bitrate: ${bitrateText}`);
-    // Send message to background script to initiate download&#8203;:contentReference[oaicite:22]{index=22}.
-    chrome.runtime.sendMessage({
-      action: 'videoFound',
-      url: videoUrl,
-      title: videoTitle,
-      resolution: resolutionText,
-      bitrate: bitrateText
-    });
-    // The background script will handle the rest (download and upload).
-    * /
-  });
-})();
-*/
