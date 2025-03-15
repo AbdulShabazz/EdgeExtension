@@ -1,6 +1,10 @@
 
 // globals
 let _uuid_ = "";
+let downloadID = null;
+let UI_BUTTON = {};
+
+const addToFAVs_xpath = "//*[@id=\"radix-:r1s:\"]/div/div[2]/div/div/div/div[3]/div[1]/button";
 
 // content.js (runs on video-gens.com pages)
 
@@ -8,8 +12,53 @@ const port = chrome.runtime.connect ({ name: "video-details" });
 port.onMessage.addListener((message, sender, sendResponse) => {
     switch (message.action) {
         case 'doRemix':
-        message.xpath = select_remix_xpath;
-        doRemixF (message);
+        UI_BUTTON['remix'].click ();
+        //message.xpath = select_remix_xpath;
+        //doRemixF (message);
+        /*
+        const iid = setInterval (() => {
+            if (document.location.href.match (/sora\.com\/t\//)) {
+                clearInterval (iid);
+                const urlSearch = document.location.href;
+                const url = document.location.href.replace (/\/t\//, '/g/');
+                port.postMessage ({ action: "url-navigate", url: url, urlSearch: urlSearch });
+            } // end if (document.location.href...)
+        }, 1);
+        */
+        document.addEventListener ('keydown', (keyCodeEvent) => {
+            if (keyCodeEvent.key.toLowerCase () == 'z') { // [z] Youtube
+                const urlSearch = "*://sora.com/*" ;// document.location.href;
+                const url = "https://www.youtube.com/upload"; //document.location.href.replace (/\/t\//, '/g/');
+                port.postMessage ({ action: "url-navigate", url: url, urlSearch: urlSearch });
+            } // end if (document.location.href...)
+        });
+        break;
+
+        case 'startUpload':
+        //invokeCtlFromXPath (addToFAVs_xpath);
+        //const vidTitle = getElementByXPath (select_generated_video_title_xpath);
+        //message.videoTitle = vidTitle.textContent;
+        //simulateKeyPress ('f', 70); // add to FAVS
+        //simulateKeyPress ('d', 68); // d/l video
+        /*
+        const iid_su = setInterval (() => {
+            let clearFlag = false;
+            findElements ('button', 'textContent', null, /Download/)
+                .map((elem) => {
+                    elem.click ();
+                    clearFlag = true;
+                    return elem;
+                });
+            if (clearFlag) {
+                clearInterval (iid_su);
+                message.action = 'downloadCompleted';
+                port.postMessage (message);
+            }
+        }, 1);
+        */
+        break;
+
+        case 'completeDownload':
         break;
 
         case 'navigateToVideoURL':
@@ -55,6 +104,22 @@ const focus_activity_window_xpath = "//*[@id=\"radix-:r1p:\"]/div/div[2]/div/div
 const select_latest_activity_xpath = "//*[@id=\"radix-:r64:\"]/div/a[1]";
 const select_AddToFAVS_xpath = "//*[@id=\"radix-:r12:\"]/div/div[2]/div/div/div/div[3]/div[1]/button";
 const select_confirm_download_xpath = "//*[@id=\"radix-:r9c:\"]/div[2]/button[2]";
+
+const select_generated_video_title_xpath = "/html/body/div[2]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div[3]/div";
+//const select_confirm_download_xpath = "//*[@id=\"radix-:r8v:\"]/div[2]/button[2]";
+
+function findElements(tag, attr, attrRegex, textRegex) {
+    return Array.from(document.querySelectorAll(tag)).filter(el => 
+        (!attr || (el.hasAttribute(attr) && attrRegex.test(el.getAttribute(attr)))) &&
+        (!textRegex || textRegex.test(el.textContent))
+    );
+}
+
+/*
+// Example: Find all `<div>` elements with `class` containing "highlight" and text with "Error"
+let result = findElements("div", "class", /highlight/, /Error/);
+console.log(result);
+*/
 
 // Simulating mouse clicks
 
@@ -110,18 +175,18 @@ const keyCodeMap = {
 };
 
 function simulateKeyPress (key, keyCode) {
-    let evt = new KeyboardEvent("keydown", {
-        key: key,
-        //code: "KeyR",
-        keyCode: keyCodeMap[key] || keyCode,
-        which: keyCodeMap[key] || keyCode,
-        bubbles: true,
-        cancelable: true
-    });
-    document.dispatchEvent(evt);
+    ['keydown', 'keypress', 'keyup'].forEach(type => {
+        const event = new KeyboardEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            key: key, // You'd loop through each character in a real implementation
+            keyCode: keyCodeMap[key]
+        });
+        document.dispatchEvent(event);
+    });    
+    // Finally dispatch the input event
+    document.dispatchEvent(new Event('input', { bubbles: true }));
 } // end simulateKeyPress
-
-let downloadID = null;
 
 function confirmDownloadFromXPath () {
     if (invokeCtlFromXPath (select_confirm_download_xpath)) {
@@ -225,13 +290,20 @@ function doRemixF (msg) {
     const uuid = msg.uuid;
     const xpath = msg.xpath;
     if (uuid === _uuid_ ) {
-        const resolution = msg.resolution;
-        const duration = msg.duration;
-        const remix = msg.remix;
-        invokeCtlFromXPath (xpath); // set focus remix_window.click ()
-        setResolution (msg);
-        setTotalNewVideos(msg);
-        setRemixStrength (msg);
+        /*
+        const remix_btn = findElements ('div', 'class', /w\-full\struncate/, /Remix/);
+        if (remix_btn) {
+            remix_btn.click ();
+        }
+        */
+        //const resolution = msg.resolution;
+        //const duration = msg.duration;
+        //const remix = msg.remix;
+        //simulateKeyPress ('r');
+        //invokeCtlFromXPath (xpath); // set focus remix_window.click ()
+        //setResolution (msg);
+        //setTotalNewVideos(msg);
+        //setRemixStrength (msg);
         // generate video ...
         // wait for video [body] to generate ...
         // navigate to new video url
@@ -391,6 +463,18 @@ function parseBody () {
     if (resolutionW === '')
         return;
     clearInterval (intID);
+    let ui_buttons = document.querySelectorAll('button'); // (17) //
+    let I = ui_buttons.length;
+    UI_BUTTON['settings'] = ui_buttons[I-0];
+    UI_BUTTON['tasks'] = ui_buttons[I-1];
+    UI_BUTTON['report'] = ui_buttons[I-2];
+    UI_BUTTON['favorite'] = ui_buttons[I-4];
+    UI_BUTTON['menu'] = ui_buttons[I-5];
+    UI_BUTTON['loop'] = ui_buttons[I-6];
+    UI_BUTTON['blend'] = ui_buttons[I-7];
+    UI_BUTTON['remix'] = ui_buttons[I-8];
+    UI_BUTTON['recut'] = ui_buttons[I-9];
+    UI_BUTTON['edit'] = ui_buttons[I-10];
     // Init bg listener
     port.postMessage ({
         action: 'videoFound',
