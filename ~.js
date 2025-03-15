@@ -1,4 +1,12 @@
 
+/*
+function Init () {
+    if ((document.readyState != 'complete') || getValueFromXPath(resolution_xpath) === '')
+        return;
+    clearInterval (intID);
+    document.addEventListener('DOMContentLoaded', parseBody);
+} // end Init
+ */
 
 /*
 // Run initialization based on document state
