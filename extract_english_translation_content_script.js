@@ -14,7 +14,7 @@ function observeDOMForNewElement(selector, callback) {
     observer.observe(document.body, { childList: true, subtree: true });
 } // end observeDOMForNewElement
 
-const port = chrome.runtime.connect ();
+const port = chrome.runtime.connect ({ name: "google-translate" });
 port.onMessage.addListener((message, sender, sendResponse) => {
     switch (message.action) {
         case 'generateEnglishPrompt':
@@ -27,9 +27,9 @@ port.onMessage.addListener((message, sender, sendResponse) => {
                   .replace(/\s*\-\s*Detected$/,'');
                 message.prompt = `${translatedText.textContent} (Original ${langElement}: ${message.prompt})`;
             }
-            message.action = "EnglishPromptCompleted";
-            port.postMessage (message);
         });
+        message.action = "EnglishPromptCompleted";
+        port.postMessage (message);
         break;
     }
 });
