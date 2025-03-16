@@ -197,7 +197,7 @@ chrome.runtime.onConnect.addListener ((port) => {
                 const msg_body = {
                     action: "doRemix",
                     uuid: uuid,
-                    title: videoTitleW,
+                    videoTitle: videoTitleW,
                     prompt: prompt,
                     resolution: resolution,
                     duration: duration,
@@ -206,31 +206,45 @@ chrome.runtime.onConnect.addListener ((port) => {
                 const msg_upload_body = {
                     action: "startUpload",
                     uuid: uuid,
-                    title: videoTitleW,
+                    videoTitle: videoTitleW,
                     prompt: prompt,
                     resolution: resolution,
                     duration: duration,
                     remix: remix
                 };
-                uploadQueue.push (msg_upload_body);
+                //uploadQueue.push (msg_upload_body);
                 if (status == 'continue') {
                     activePorts['video-details'].postMessage(msg_body);
-                } // end if (status === 'continue')
+                } // end if (status == 'continue')
                 break;
 
                 case 'url-navigate':
-                const i = Math.max (uploadQueue.length-1,0);
-                const msg = uploadQueue[i];
                 const url = message.url;
                 const urlSearch = message.urlSearch;
-                chrome.tabs.query ({ url:urlSearch }, (tabs) => {
-                    tabs.forEach (tab => {
-                        if (tab.id) {
-                            chrome.tabs.update (tab.id, { url:url });
-                        }
-                    });
+                uploadQueue.push (message);
+                chrome.tabs.query({ url: urlSearch }, function(tabs) {
+                    if (tabs.length === 0) {
+                        console.warn('No open translate tab found. Opening a new one.');
+                        openTab (url); // open tab in the bg
+                    } else {
+                        // Use the first translate tab found
+                        let translateTab = tabs[0];
+                        // Navigate it to the translate page (if not already there)
+                        chrome.tabs.update(
+                            translateTab.id, 
+                            { url: url, active: true }, 
+                            function (updatedTab) {
+                                console.log('Updating existing translate.google.com tab...');
+                            }
+                        );
+                    }
                 });
-                activePorts['youtube-upload'].postMessage (msg);
+                break;
+
+                case 'url-youtube': // site-ready //
+                const msg_2 = uploadQueue.shift ();
+                msg_2.action = "startUpload";
+                activePorts['youtube-upload'].postMessage (msg_2);
                 break;
 
                 case 'downloadCompleted':

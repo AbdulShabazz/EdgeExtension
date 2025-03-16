@@ -25,7 +25,7 @@ port.onMessage.addListener((message, sender, sendResponse) => {
                   .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
                   .textContent
                   .replace(/\s*\-\s*Detected$/,'');
-                message.prompt = `OpenAI Sora - ${translatedText.textContent} (Original ${langElement} Prompt: ${message.prompt})`;
+                message.prompt = `${translatedText.textContent} (Original ${langElement} Prompt: ${message.prompt})`;
             }
         });
         message.action = "EnglishPromptCompleted";

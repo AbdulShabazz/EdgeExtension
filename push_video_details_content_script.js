@@ -6,71 +6,82 @@ let UI_BUTTON = {};
 
 const addToFAVs_xpath = "//*[@id=\"radix-:r1s:\"]/div/div[2]/div/div/div/div[3]/div[1]/button";
 
+let keyCodeShift = false;
+
+document.addEventListener ('keydown', (keyCodeEvent) => {
+    if (keyCodeEvent.shiftKey) { // [Shift] Youtube
+        keyCodeShift = true;
+    } // end if (document.location.href...)
+}, 1);
+
 // content.js (runs on video-gens.com pages)
 
-const port = chrome.runtime.connect ({ name: "video-details" });
-port.onMessage.addListener((message, sender, sendResponse) => {
-    switch (message.action) {
+// Store the port reference
+let port;
+
+// Function to establish connection
+function connectPort() {
+    port = chrome.runtime.connect({ name: "video-details" });
+    
+    // Add disconnection listener
+    port.onDisconnect.addListener(() => {
+        console.log("Port disconnected. Reconnecting...");
+        // Optional: attempt to reconnect after a short delay
+        setTimeout(connectPort, 250);
+    });
+    
+    // Add message listener
+    port.onMessage.addListener((message, sender, sendResponse) => {
+        switch (message.action) {
         case 'doRemix':
-        UI_BUTTON['remix'].click ();
-        //message.xpath = select_remix_xpath;
-        //doRemixF (message);
-        /*
-        const iid = setInterval (() => {
-            if (document.location.href.match (/sora\.com\/t\//)) {
-                clearInterval (iid);
-                const urlSearch = document.location.href;
-                const url = document.location.href.replace (/\/t\//, '/g/');
-                port.postMessage ({ action: "url-navigate", url: url, urlSearch: urlSearch });
-            } // end if (document.location.href...)
-        }, 1);
-        */
-        document.addEventListener ('keydown', (keyCodeEvent) => {
-            if (keyCodeEvent.key.toLowerCase () == 'z') { // [z] Youtube
-                const urlSearch = "*://sora.com/*" ;// document.location.href;
-                const url = "https://www.youtube.com/upload"; //document.location.href.replace (/\/t\//, '/g/');
-                port.postMessage ({ action: "url-navigate", url: url, urlSearch: urlSearch });
-            } // end if (document.location.href...)
-        });
-        break;
+            UI_BUTTON['remix'].click();
+            const iid = setInterval(() => {
+            if (!keyCodeShift)
+                return;
+            clearInterval(iid);
+            
+            const urlSearch = "*://sora.com/*";
+            const url = "https://www.youtube.com/upload";
+            
+            // Check if port is connected before sending message
+            if (port && !chrome.runtime.lastError) {
+                try {
+                    const newVideoTitle = document.querySelector('div[class="truncate"]')?.textContent;                
+                    message.action = "url-navigate";
+                    message.videoTitle = `OpenAI Sora - ${newVideoTitle}`;
+                    message.url = url;
+                    message.urlSearch = urlSearch;
+                    port.postMessage(message);
+                } catch (err) {
+                    console.error("Error posting message:", err);
+                    // Attempt to reconnect
+                    connectPort();
+                }
+            } else {
+                console.log("Port disconnected, reconnecting before sending message");
+                connectPort();
+            }
+            }, 1);
+            break;
 
         case 'startUpload':
-        //invokeCtlFromXPath (addToFAVs_xpath);
-        //const vidTitle = getElementByXPath (select_generated_video_title_xpath);
-        //message.videoTitle = vidTitle.textContent;
-        //simulateKeyPress ('f', 70); // add to FAVS
-        //simulateKeyPress ('d', 68); // d/l video
-        /*
-        const iid_su = setInterval (() => {
-            let clearFlag = false;
-            findElements ('button', 'textContent', null, /Download/)
-                .map((elem) => {
-                    elem.click ();
-                    clearFlag = true;
-                    return elem;
-                });
-            if (clearFlag) {
-                clearInterval (iid_su);
-                message.action = 'downloadCompleted';
-                port.postMessage (message);
-            }
-        }, 1);
-        */
-        break;
+            break;
 
         case 'completeDownload':
-        break;
+            break;
 
         case 'navigateToVideoURL':
-        break;
+            break;
 
         case 'doDownload':
-        break;
-    }
-});
-port.onDisconnect.addListener (() => {
-    console.info ('push_video_details_content_script.js connection to background service worker port, disconnected.')
-});
+            break;
+        }
+        return true;
+    });
+}
+
+// Initialize connection
+connectPort();
 
 // Video Details
 const videoName_xpath = "/html/body/main/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div[3]/div"; // name
