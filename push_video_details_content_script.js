@@ -35,7 +35,7 @@ function connectPort() {
         switch (message.action) {
         case 'doRemix':
             UI_BUTTON['remix'].click();
-            const iid = setInterval(() => {
+            let iid = setInterval(() => {
             if (!keyCodeShift)
                 return;
             clearInterval(iid);
@@ -46,11 +46,21 @@ function connectPort() {
             // Check if port is connected before sending message
             if (port && !chrome.runtime.lastError) {
                 try {
-                    const newVideoTitle = document.querySelector('div[class="truncate"]')?.textContent;                
-                    message.action = "url-navigate";
-                    message.videoTitle = `OpenAI Sora - ${newVideoTitle}`;
-                    message.url = url;
-                    message.urlSearch = urlSearch;
+                    function buildPrompt (){
+                        iid = setTimeout (() => {
+                            const newVideoTitle = document.querySelector('div[class="truncate"]')?.textContent;
+                            clearTimeout (iid);   
+                            if (!newVideoTitle){
+                                buildPrompt ();
+                                return;
+                            }           
+                            message.action = "url-navigate";
+                            message.videoTitle = `OpenAI Sora - ${newVideoTitle}`;
+                            message.url = url;
+                            message.urlSearch = urlSearch;
+                        }, 500);                        
+                    } // end buildPrompt
+                    buildPrompt ();
                     port.postMessage(message);
                 } catch (err) {
                     console.error("Error posting message:", err);
