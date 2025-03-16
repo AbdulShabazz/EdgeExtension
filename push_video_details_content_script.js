@@ -78,7 +78,7 @@ function connectPort() {
         }
         return true;
     });
-}
+} // end connectPort
 
 // Initialize connection
 connectPort();
