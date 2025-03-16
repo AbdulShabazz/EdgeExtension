@@ -39,7 +39,7 @@ The manifest defines the extension’s metadata, background scripts, content scr
   "content_scripts": [
     {
       "matches": ["*://video-gens.com/*"],
-      "js": ["content.js"]
+      "js": ["query_likes_content_script.js"]
     },
     {
       "matches": ["*://www.youtube.com/upload*"],
@@ -58,7 +58,7 @@ The manifest defines the extension’s metadata, background scripts, content scr
 
 - The extension runs a background service worker (`background.js`) to handle long-lived tasks (downloads, tab management). Edge/Chrome automatically launches this background script when needed (and with `"background"` permission, Edge can keep it alive longer ([Declare API permissions in the manifest - Microsoft Edge Developer documentation | Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/declare-permissions#:~:text=,permission%20with%20%206%20background))).
 - `content_scripts`: 
-  - `content.js` runs on all pages of **video-gens.com** to detect videos and extract metadata.
+  - `query_likes_content_script.js` runs on all pages of **video-gens.com** to detect videos and extract metadata.
   - `youtubeContent.js` runs on the **YouTube upload page** to automate the file upload and form filling.
 - **Permissions:** We include `"downloads"` (to manage file downloads) and `"tabs"` (to locate and manipulate the YouTube tab). According to the documentation, the `downloads` permission **grants access to the chrome.downloads API** ([Declare API permissions in the manifest - Microsoft Edge Developer documentation | Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/declare-permissions#:~:text=,your%20extension%20access%20to%20the)), and `tabs` allows access to privileged tab info and tab operations ([Declare API permissions in the manifest - Microsoft Edge Developer documentation | Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/declare-permissions#:~:text=,make%20use%20of%20these%20APIs)). Host permissions for the specific domains allow the content scripts and cross-domain requests to those pages.
 
@@ -153,11 +153,43 @@ function sendUploadMessageWhenReady(tabId, title, sizeText, videoUrl) {
 }
 ```
 
-**How this works:** When `content.js` finds a video, it sends a `{action: 'videoFound', ...}` message. The background script starts the download using `chrome.downloads.download` (with `saveAs: false` to avoid prompting). We **listen for the download’s state change** and check when it becomes `"complete"` ([javascript - Use chrome.downloads API in manifest v3 Chrome extension - Stack Overflow](https://stackoverflow.com/questions/75326332/use-chrome-downloads-api-in-manifest-v3-chrome-extension#:~:text=chrome.downloads.onChanged.addListener%28%28dd%29%20%3D,)). Once complete, we retrieve the file size and then **find or open a YouTube tab**. We update that tab’s URL to the YouTube upload page (`/upload`) and wait until it's fully loaded. Finally, we send a message (`startUpload`) to the YouTube content script, including the video’s title, size (converted to a human-readable string), and the video URL (which will be used to fetch the file for upload).
+I'll help clarify this description for your Microsoft Edge extension that connects Sora (AI video generation) with YouTube uploads. Here's a clearer explanation:
+
+# How the Sora/YouTube Extension Works
+
+1. **Video Discovery**: When browsing eg., Sora.com, the `query_likes_content_script.js` automatically detects videos and provides an option to open them in a new tab.
+
+2. **Video Editing**: In this new tab, you can:
+   - Remix or recut the video
+   - Create storyboards
+   - Make other edits as needed
+   - Etc.
+
+3. **Download Process**: After finishing any edits, download the final generated video to your computer.
+
+4. **YouTube Upload**: 
+   - Hold the SHIFT key to navigate to YouTube's upload page
+   - Select your newly downloaded video
+   - Apply any pre-designed templates if desired
+
+5. **Auto-Population Feature**:
+   - When you reach the video description page, hold the SHIFT key
+   - The extension will automatically populate the title field with the Sora video title
+   - The description field will be filled with the Sora video generation prompt
+   - Important: These auto-populated changes are temporary until confirmed
+
+6. **Confirming Changes**:
+   - Click at the end of each auto-populated field
+   - Press SPACEBAR to confirm the changes (this registers the automated changes as a user interaction)
+
+7. **Complete Upload**:
+   - Fill in remaining details (category, visibility, etc.)
+   - Add captions and timestamps as needed
+   - Complete the upload process as normal
 
 > **Edge Note:** The use of `chrome.tabs.query` and `chrome.tabs.update` requires the `"tabs"` permission. In Edge/Chrome, this permission grants access to manipulate tabs and read certain tab properties ([Declare API permissions in the manifest - Microsoft Edge Developer documentation | Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/declare-permissions#:~:text=,make%20use%20of%20these%20APIs)). The `"downloads"` permission is needed to manage downloads ([Declare API permissions in the manifest - Microsoft Edge Developer documentation | Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/declare-permissions#:~:text=,your%20extension%20access%20to%20the)). Both are declared in the manifest as shown earlier. Since the extension is running in the background, no user interface is needed; however, the extension must be loaded/installed in Edge and enabled. Edge will treat this extension like a Chrome extension, so no code changes are needed for Edge specifically ([Why use the Edge extension on Edge instead of Chrome's? : r/Bitwarden](https://www.reddit.com/r/Bitwarden/comments/16a18e5/why_use_the_edge_extension_on_edge_instead_of/#:~:text=%E2%80%A2)).
 
-## Content Script for Video Detection (`content.js`)
+## Content Script for Video Detection (`query_likes_content_script.js`)
 
 The content script runs on `video-gens.com` pages to **detect video content and gather metadata**. It operates in the context of the webpage (but in an isolated environment) and can access the DOM to find video elements or related info ([Message passing  |  Chrome Extensions  |  Chrome for Developers](https://developer.chrome.com/docs/extensions/develop/concepts/messaging#:~:text=Because%20content%20scripts%20run%20in,action%20icon%20for%20that%20page)). Once it identifies a video, it collects details and notifies the background script via message passing ([Message passing  |  Chrome Extensions  |  Chrome for Developers](https://developer.chrome.com/docs/extensions/develop/concepts/messaging#:~:text=This%20communication%20uses%20message%20passing%2C,extension%20messages%20section)).
 
@@ -167,10 +199,10 @@ The content script runs on `video-gens.com` pages to **detect video content and 
 - **Extract metadata:** It gathers video encoding details like resolution and bitrate from the page. For example, it can read the video’s dimensions via the video element properties or parse any textual metadata on the page (e.g., if the site displays “1080p” or bitrate info).
 - **Send message to background:** Using `chrome.runtime.sendMessage`, it sends an object with the video URL, title, resolution, bitrate, etc., to trigger the download in the background script.
 
-Below is the `content.js` code:
+Below is the `query_likes_content_script.js` code:
 
 ```js
-// content.js (runs on video-gens.com pages)
+// query_likes_content_script.js (runs on video-gens.com pages)
 (function() {
   // Wait for the DOM to load or video element to be ready
   window.addEventListener('DOMContentLoaded', () => {
@@ -420,7 +452,7 @@ This process should help you effectively debug your Edge extension. Let me know 
 - Sends the details to the **background script**.
 
 ```js
-// content.js (Runs in `video-gens.com`)
+// query_likes_content_script.js (Runs in `video-gens.com`)
 document.addEventListener("DOMContentLoaded", () => {
     let video = document.querySelector("video");
     if (!video) return;
