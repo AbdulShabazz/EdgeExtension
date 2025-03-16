@@ -14,25 +14,41 @@ function observeDOMForNewElement(selector, callback) {
     observer.observe(document.body, { childList: true, subtree: true });
 } // end observeDOMForNewElement
 
-const port = chrome.runtime.connect ({ name: "google-translate" });
-port.onMessage.addListener((message, sender, sendResponse) => {
-    switch (message.action) {
+// Store the port reference
+let port;
+
+// Function to establish connection
+function connectPort() {
+    port = chrome.runtime.connect({ name: "google-translate" });
+    
+    // Add disconnection listener
+    port.onDisconnect.addListener(() => {
+        console.log("Port disconnected. Reconnecting...");
+        // Optional: attempt to reconnect after a short delay
+        setTimeout(connectPort, 250);
+    });
+    
+    // Add message listener
+    port.onMessage.addListener((message, sender, sendResponse) => {
+        switch (message.action) {
         case 'generateEnglishPrompt':
-        const inputText = document.querySelector('textarea[aria-label]');
-        observeDOMForNewElement ('[jsname="W297wb"]', (translatedText) => {
-            if (translatedText.textContent != inputText.textContent) {
-                const langElement = document
-                  .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
-                  .textContent
-                  .replace(/\s*\-\s*Detected$/,'');
+            const inputText = document.querySelector('textarea');
+            const iid = setTimeout (() => {
+                clearTimeout (iid);
+                const stranslatedText = document.querySelector('[jsname="W297wb"]');
+                const langElement = document.querySelector('[class="VfPpkd-jY41G-V67aGc"]').textContent.replace(/\s*\-\s*Detected$/,'');
                 message.prompt = `${translatedText.textContent} (Original ${langElement} Prompt: ${message.prompt})`;
-            }
-        });
-        message.action = "EnglishPromptCompleted";
-        port.postMessage (message);
-        break;
-    }
-});
+            }, 800);
+            message.action = "EnglishPromptCompleted";
+            port.postMessage (message);
+            break;
+        }
+        return true;
+    });
+} // end connectPort
+
+// Initialize connection
+connectPort();
 
 function getElementByXPath (xpath) {
     let ret = null;
