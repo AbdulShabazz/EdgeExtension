@@ -1,6 +1,13 @@
 
 // Content script for Microsoft Edge extension
-const port = chrome.runtime.connect ({ name: "recent-videos" });
+let port = chrome.runtime.connect ({ name: "recent-videos" });
+    
+// Add disconnection listener
+port.onDisconnect.addListener(() => {
+    console.log("Port 'recent-videos' disconnected. Reconnecting...");
+    // Optional: attempt to reconnect after a short delay
+    setTimeout(() => { port = chrome.runtime.connect ({ name: "recent-videos" }) }, 1);
+});
 
 // Function to query all elements with data-index and report them
 function queryHTMLElements() {
