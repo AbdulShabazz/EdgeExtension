@@ -1,4 +1,265 @@
 
+
+const port = chrome.runtime.connect ({ name: "video-details" });
+port.onMessage.addListener((message, sender, sendResponse) => {
+    switch (message.action) {
+        case 'doRemix':
+        UI_BUTTON['remix'].click ();
+        //message.xpath = select_remix_xpath;
+        //doRemixF (message);
+        /*
+        const iid = setInterval (() => {
+            if (document.location.href.match (/sora\.com\/t\//)) {
+                clearInterval (iid);
+                const urlSearch = document.location.href;
+                const url = document.location.href.replace (/\/t\//, '/g/');
+                port.postMessage ({ action: "url-navigate", url: url, urlSearch: urlSearch });
+            } // end if (document.location.href...)
+        }, 1);
+        */
+        document.addEventListener ('keydown', (keyCodeEvent) => {
+            if (keyCodeEvent.shiftKey) { // [Shift] Youtube
+                const urlSearch = "*://sora.com/*" ;// document.location.href;
+                const url = "https://www.youtube.com/upload"; //document.location.href.replace (/\/t\//, '/g/');
+                port.postMessage ({ action: "url-navigate", url: url, urlSearch: urlSearch });
+            } // end if (document.location.href...)
+        }, false);
+        break;
+
+        case 'startUpload':
+        //invokeCtlFromXPath (addToFAVs_xpath);
+        //const vidTitle = getElementByXPath (select_generated_video_title_xpath);
+        //message.videoTitle = vidTitle.textContent;
+        //simulateKeyPress ('f', 70); // add to FAVS
+        //simulateKeyPress ('d', 68); // d/l video
+        /*
+        const iid_su = setInterval (() => {
+            let clearFlag = false;
+            findElements ('button', 'textContent', null, /Download/)
+                .map((elem) => {
+                    elem.click ();
+                    clearFlag = true;
+                    return elem;
+                });
+            if (clearFlag) {
+                clearInterval (iid_su);
+                message.action = 'downloadCompleted';
+                port.postMessage (message);
+            }
+        }, 1);
+        */
+        break;
+
+        case 'completeDownload':
+        break;
+
+        case 'navigateToVideoURL':
+        break;
+
+        case 'doDownload':
+        break;
+    }
+    return true;
+});
+
+port.onMessage.addListener((message, sender, sendResponse) => {
+  switch (message.action) {
+      case 'startUpload':
+      const filePicker = document.querySelector('ytcp-button[id="select-files-button"]');
+      filePicker.click ();        
+      document.addEventListener ('keydown', (keyCodeEvent) => {
+          if (keyCodeEvent.shiftKey) { // [Shift] Youtube
+              const input_field = document.querySelectorAll('ytcp-social-suggestion-input[id="input"]');
+              input_field[0].textContent = message.videoTitle;
+              input_field[1].textContent.replace (/^Prompt:.+\n/, `${message.prompt}\n`);
+          } // end if (keyCodeEvent.shiftKey)
+      });
+      break;
+
+      case 'completeDownload':
+      break;
+  }
+/*
+if (message.action === 'startUpload') {
+  const { videoTitle, videoSizeText, videoUrl } = message;
+  console.log('Received video upload request for:', videoTitle);
+
+  try {
+    // 1. Fetch the video data as a Blob.
+    const response = await fetch(videoUrl);
+    const videoBlob = await response.blob();
+    // Create a File object from the Blob (to mimic a file input selection)&#8203;:contentReference[oaicite:26]{index=26}.
+    const fileName = videoTitle.endsWith('.mp4') ? videoTitle : (videoTitle + '.mp4');
+    const videoFile = new File([videoBlob], fileName, { type: "video/mp4" });
+
+    // 2. Find the YouTube file input element on the upload page.
+    const fileInput = document.querySelector('input[type="file"]');
+    if (!fileInput) {
+      console.error('YouTube upload file input not found!');
+      return;
+    }
+
+    // 3. Use DataTransfer to simulate selecting the file&#8203;:contentReference[oaicite:27]{index=27}.
+    const dt = new DataTransfer();
+    dt.items.add(videoFile);
+    fileInput.files = dt.files;
+    // Dispatch a change event to signal that a file was "chosen".
+    fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // 4. Set the video title and description fields.
+    // (YouTube’s upload page should have title/description inputs; selectors may vary.)
+    const titleField = document.querySelector('input#title') || document.querySelector('textarea#title');
+    const descField = document.querySelector('textarea#description') || document.querySelector('input#description');
+    if (titleField) {
+      titleField.value = videoTitle;
+      titleField.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    if (descField) {
+      descField.value = "File size: " + videoSizeText;
+      descField.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    console.log('Video file injected into YouTube upload form. Title and description set.');
+    // Optionally, simulate clicks on Next/Publish if full automation of publishing is desired.
+  } catch (err) {
+    console.error('Upload automation failed:', err);
+  }
+}
+  */
+  return true;
+}); // end port.onMessage.addListener
+
+// Listen for one-time messages from content scripts&#8203;:contentReference[oaicite:13]{index=13}.
+chrome.runtime.onConnect.addListener ((port) => {
+  activePorts[port.name] = port;  // Maintain a reference to keep the port open
+  port.onMessage.addListener((message, sender, sendResponse) => {
+      try {
+          switch (message.action) {
+              case 'NewDataIndexElementsFound':
+                ;;
+              break;
+
+              case 'DataIndexElementClicked':
+              InprocessQueue.push (message);
+              break;
+
+              case 'videoFound':
+              message.prompt = stripSymbols(message.prompt);
+              standardizeEnglishPrompt (message);
+              message.action = 'generateEnglishPrompt';
+              // cache workload //
+              buffer.push (message);
+              break;
+
+              case 'translateSiteReady':
+              activePorts['google-translate'].postMessage (buffer.shift());
+              break;
+
+              case 'EnglishPromptCompleted':
+              const uuid = message.uuid;
+              const tmpResolutionW = message.resolution;
+              const tmpDurationW = message.duration;
+              const videoTitleW = message.videoTitle;
+              const prompt = message.prompt;
+              const { status, resolution, duration, remix } = calcResolutionAndDuration (tmpResolutionW, tmpDurationW);
+              const msg_body = {
+                  action: "doRemix",
+                  uuid: uuid,
+                  title: videoTitleW,
+                  prompt: prompt,
+                  resolution: resolution,
+                  duration: duration,
+                  remix: remix
+              };
+              const msg_upload_body = {
+                  action: "startUpload",
+                  uuid: uuid,
+                  title: videoTitleW,
+                  prompt: prompt,
+                  resolution: resolution,
+                  duration: duration,
+                  remix: remix
+              };
+              uploadQueue.push (msg_upload_body);
+              if (status == 'continue') {
+                  activePorts['video-details'].postMessage(msg_body);
+              } // end if (status === 'continue')
+              break;
+
+              case 'url-navigate':
+              //const i = Math.max (uploadQueue.length-1,0);
+              //const msg = uploadQueue[i];
+              const url = message.url;
+              const urlSearch = message.urlSearch;
+              chrome.tabs.query({ url: urlSearch }, function(tabs) {
+                  if (tabs.length === 0) {
+                      console.warn('No open translate tab found. Opening a new one.');
+                      openTab (url); // open tab in the bg
+                  } else {
+                      // Use the first translate tab found
+                      let translateTab = tabs[0];
+                      // Navigate it to the translate page (if not already there)
+                      chrome.tabs.update(
+                          translateTab.id, 
+                          { url: url, active: true }, 
+                          function (updatedTab) {
+                              console.log('Updating existing translate.google.com tab...');
+                          }
+                      );
+                  }
+              });
+              //chrome.tabs.update (sender.tab.id, { url:url });
+              //msg.action = "startUpload";
+              //uploadQueue[i] = msg;
+              // In your service worker (sw.js)
+              //openTab (url);
+              /*
+              chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                  if (tabs && tabs.length > 0) {
+                      const currentTab = tabs[0];
+                      console.log("Current tab URL:", currentTab.url);
+                      
+                      // Update the URL of the current tab
+                      chrome.tabs.update(currentTab.id, {url: url});
+                  }
+              });
+              */
+              //activePorts['youtube-upload'].postMessage (msg);
+              break;
+
+              case 'url-youtube': // site-ready //
+              //const ii = Math.max (uploadQueue.length-1,0);
+              const msg_2 = uploadQueue.shift ();//[ii];
+              msg_2.action = "startUpload";
+              activePorts['youtube-upload'].postMessage (msg_2);
+              break;
+
+              case 'downloadCompleted':
+              chrome.tabs.query ({ url:message.url }, (tabs) => {
+                  tabs.forEach (tab => {
+                      if (tab.id) {
+                          chrome.tabs.update (tab.id, { url:'https://www.youtube.com/upload' });
+                      }
+                  });
+              });
+              downloadLog(message);
+              break;
+          } // end switch (message.action)
+
+          // Periodically check for new videos (small overhead)
+          setInterval(preEvaluateVideo, 1);
+      }
+      catch (e) {
+        
+      } // end try/catch
+      // Return true to indicate we'll send a response asynchronously (if needed).
+      return true;
+  }); // end port.onMessage.addListener
+  port.onDisconnect.addListener (() => {
+      console.info ('background.js connection to background service worker port, disconnected.')
+  }); // end port.onDisconnect
+}); // end chrome.runtime.onConnect
+
 /*
 function Init () {
     if ((document.readyState != 'complete') || getValueFromXPath(resolution_xpath) === '')
