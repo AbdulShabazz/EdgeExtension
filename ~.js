@@ -1,5 +1,77 @@
 
 
+function Init () {
+  document.addEventListener ('keydown', (keyCodeEvent) => {
+      if (keyCodeEvent.shiftKey) { // [Shift] Youtube
+          const input_field = document.querySelectorAll('div[id=textbox]');
+          const msg = messageQueue[0];
+          const videoTitle = msg.videoTitle;
+          const prompt = input_field[1].textContent.replace (/^Prompt:(.+)\n/, `${msg.prompt}`);
+          const originalDescriptor = Object.getOwnPropertyDescriptor (Node.prototype, "textContent");
+          Object.defineProperty(input_field[0],"textContent", {
+              set: function (u) {
+                  return originalDescriptor.set.call(this, videoTitle);
+              },
+              get: function () {
+                  return originalDescriptor.get.call(this);
+              }
+          });
+          Object.defineProperty(input_field[1],"textContent", {
+              set: function (u) {
+                  return originalDescriptor.set.call(this, prompt);
+              },
+              get: function () {
+                  return originalDescriptor.get.call(this);
+              }
+          });
+          input_field[0].textContent = videoTitle;
+          input_field[1].textContent = prompt;
+      } // end if (keyCodeEvent.shiftKey)
+  });
+  port.postMessage ({ action: "url-youtube" });
+} // end Init
+
+function Init () {
+  document.addEventListener ('keydown', (keyCodeEvent) => {
+      if (keyCodeEvent.shiftKey) { // [Shift] Youtube
+          const input_field = document.querySelectorAll('div[id=textbox]');
+          const msg = messageQueue[0];
+          setInterval (() => {
+              input_field[0].textContent = msg.videoTitle;
+              input_field[1].textContent = input_field[1].textContent.replace (/^(Prompt:.+)\n/, `${msg.prompt}`);
+          }, 1);
+          /*
+          let observer = new MutationObserver (() => {
+              const input_field = document.querySelectorAll('div[id=textbox]');
+              const msg = messageQueue[0];
+              if (input_field[0].textContent !== msg.videoTitle) {
+                  input_field[0].textContent = msg.videoTitle;
+                  input_field[1].textContent = input_field[1].textContent.replace (/^(Prompt:.+)\n/, `${msg.prompt}`);
+              }
+          });
+          observer.observe (document.querySelector('div[id=textbox]'),{ childList: true });
+          */
+          //input_field[0].textContent = "Hello";//msg.videoTitle;
+          //input_field[1].textContent = "World";//input_field[1].textContent.replace (/^(Prompt:.+)\n/, `${msg.prompt}`);
+          //input_field[0].dispatchEvent (new Event ('input', { bubbles: true }));
+          //input_field[1].dispatchEvent (new Event ('input', { bubbles: true }));
+      } // end if (keyCodeEvent.shiftKey)
+  });
+  /*
+  const xpath = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-uploads-file-picker/div/ytcp-button/ytcp-button-shape/button';
+  const filePicker = document.evaluate(
+      xpath,
+      document,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null
+  );//document.getElementsByXPath ();//document.querySelectorAll('button')[13];
+  filePicker.click ();
+  */
+  //document.querySelectorAll('button')[13].click ();
+  port.postMessage ({ action: "url-youtube" });
+} // end Init
+
 const port = chrome.runtime.connect ({ name: "video-details" });
 port.onMessage.addListener((message, sender, sendResponse) => {
     switch (message.action) {
