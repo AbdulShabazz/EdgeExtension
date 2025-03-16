@@ -320,47 +320,6 @@ function setRemixStrength (msg) {
     });
 } // end setRemixStrength
 
-function doRemixF (msg) {
-    const uuid = msg.uuid;
-    const xpath = msg.xpath;
-    if (uuid === _uuid_ ) {
-        /*
-        const remix_btn = findElements ('div', 'class', /w\-full\struncate/, /Remix/);
-        if (remix_btn) {
-            remix_btn.click ();
-        }
-        */
-        //const resolution = msg.resolution;
-        //const duration = msg.duration;
-        //const remix = msg.remix;
-        //simulateKeyPress ('r');
-        //invokeCtlFromXPath (xpath); // set focus remix_window.click ()
-        //setResolution (msg);
-        //setTotalNewVideos(msg);
-        //setRemixStrength (msg);
-        // generate video ...
-        // wait for video [body] to generate ...
-        // navigate to new video url
-        // add to Favorites
-        // get video title
-        // doDownload (); // d/l [video].mp4
-        // doDownload (); // d/l [video].log (title + english prompt [+ prompt])
-        /*
-        // close window
-        port.postMessage ({
-            //action:"videoCompleted",
-            action:"downloadCompleted",
-            uuid: uuid,
-            title: newVideoTitleW,
-            prompt: prompt,
-            resolution: resolution,
-            duration: duration,
-            remix: remix
-        });
-        */
-    } // end if(uuid === _uuid_ )
-} // end doRemixF
-
 /**
  * Triggers a mouse click event at a specified distance above an HTML element
  * @param {HTMLElement|string} element - The target element or its CSS selector

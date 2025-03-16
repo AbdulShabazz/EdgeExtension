@@ -64,10 +64,12 @@ function calcResolutionAndDuration (res,dur) {
 } // end getResolutionAndDuration
 
 function stripSymbols (promptW) {
+    const MAXLENGTH = 2236;
     const prompt = promptW
       .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF\u2190-\u21FF\u2500-\u257F\u2B50-\u2BFF\uFE0F]/gu, '')
-      .replace(/\s+/g, ' ');
-    return prompt;
+      .replace(/\s+/g, ' ')
+      .substring (0, MAXLENGTH);
+    return `${prompt}${(promptW < MAXLENGTH ? '' : ' ...')}`;
 } // end stripSymbols
 
 function downloadLog (msg) {
@@ -90,29 +92,6 @@ function downloadLog (msg) {
                     // Download is complete&#8203;:contentReference[oaicite:15]{index=15}.
                     chrome.downloads.onChanged.removeListener(onChanged);
                     console.info (`${totalVideosInt64}. video log downloaded.`);
-                    /*
-                    // Get the file size from the download item
-                    chrome.downloads.search({ id: downloadId }, function(results) {
-                        let fileSizeBytes = results && results[0] ? results[0].fileSize : 0;
-                        let fileSizeMB = fileSizeBytes ? (fileSizeBytes / (1024*1024)).toFixed(2) + ' MB' : '';
-                        
-                        // Find an open YouTube tab.
-                        chrome.tabs.query({ url: "*://*.youtube.com/*" }, function(tabs) {
-                            if (tabs.length === 0) {
-                                console.warn('No open YouTube tab found. Opening a new one.');
-                                openTab({ url: "https://www.youtube.com/upload" });
-                            } else {
-                                // Use the first YouTube tab found (could refine to specific tab if needed).
-                                let ytTab = tabs[0];
-                                // Navigate it to the upload page (if not already there).
-                                chrome.tabs.update(ytTab.id, { url: "https://www.youtube.com/upload", active: false }, 
-                                updatedTab => {
-                                    ;;
-                                });
-                            }
-                        });
-                    });
-                    */
                 } // end if (delta.id === downloadId ... )
             }); // end chrome.downloads.onChanged.addListener
             // cleanup url //

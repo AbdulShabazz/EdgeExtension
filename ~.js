@@ -1,4 +1,130 @@
 
+
+/*
+
+  /*
+  document.readyState = 'complete'; // 'loading', 'interactive'
+
+  const elemsWithID = document.querySelectorAll("[data-index]");
+
+  elemsWithID.forEach(eem => {});
+
+  data-index="7"
+  /html/body/main/div/div[1]/div/div/div[2]/div/div/div[2]/div/div[1]/div[8]/div/div/div/div/div[2]/div[3]
+  /html/body/main/div/div[1]/div/div/div[2]/div/div/div[2]/div/div[1]/div[9]/div/div/div/div/div[2]/div[3]
+
+  * /
+  <div class="h-full w-full"><div class="group relative h-full w-full animate-pulse bg-gray-200"><a href="/g/gen_01jp7p21vmfqtt5sc8z1afwr9r"><div class="relative h-full w-full"><div class="relative h-full w-full" style="aspect-ratio: 1.77917 / 1;"><div class="absolute left-0 top-0 h-full w-full"><div class="relative h-full w-full"><div class="absolute left-0 top-0 h-full w-full"><div class="relative h-full w-full animate-pulse bg-secondary/20"><img src="https://videos.openai.com/vg-assets/assets%2Ftask_01jp7p0cvcecj9v89t11zsc5rh%2Ftask_01jp7p0cvcecj9v89t11zsc5rh_genid_d2d870bf-ed2a-4104-88c8-bfecfdc148a9_25_03_13_12_00_122245%2Fvideos%2F00000_129642815%2Fthumb.webp?st=2025-03-13T10%3A51%3A50Z&amp;se=2025-03-19T11%3A51%3A50Z&amp;sks=b&amp;skt=2025-03-13T10%3A51%3A50Z&amp;ske=2025-03-19T11%3A51%3A50Z&amp;sktid=a48cca56-e6da-484e-a814-9c849652bcb3&amp;skoid=8ebb0df1-a278-4e2e-9c20-f2d373479b3a&amp;skv=2019-02-02&amp;sv=2018-11-09&amp;sr=b&amp;sp=r&amp;spr=https%2Chttp&amp;sig=IN2Jd19Mgx3rHcsWhhVK4kogV79%2BukctQkQjg1oWUJk%3D&amp;az=oaivgprodscus" class="h-full w-full object-cover" alt="Generation placeholder" style="display: none;"></div></div><div class="absolute left-0 top-0 h-full w-full"></div><div class="absolute left-0 top-0 h-full w-full transition-opacity opacity-100"></div></div></div></div></div></a></div></div>
+  */
+
+/*
+
+  /*
+  document.readyState = 'complete'; // 'loading', 'interactive'
+
+  const elemsWithID = document.querySelectorAll("[data-index]");
+
+  elemsWithID.forEach(eem => {});
+
+  data-index="7"
+  /html/body/main/div/div[1]/div/div/div[2]/div/div/div[2]/div/div[1]/div[8]/div/div/div/div/div[2]/div[3]
+  /html/body/main/div/div[1]/div/div/div[2]/div/div/div[2]/div/div[1]/div[9]/div/div/div/div/div[2]/div[3]
+
+  * /
+  <div class="h-full w-full"><div class="group relative h-full w-full animate-pulse bg-gray-200"><a href="/g/gen_01jp7p21vmfqtt5sc8z1afwr9r"><div class="relative h-full w-full"><div class="relative h-full w-full" style="aspect-ratio: 1.77917 / 1;"><div class="absolute left-0 top-0 h-full w-full"><div class="relative h-full w-full"><div class="absolute left-0 top-0 h-full w-full"><div class="relative h-full w-full animate-pulse bg-secondary/20"><img src="https://videos.openai.com/vg-assets/assets%2Ftask_01jp7p0cvcecj9v89t11zsc5rh%2Ftask_01jp7p0cvcecj9v89t11zsc5rh_genid_d2d870bf-ed2a-4104-88c8-bfecfdc148a9_25_03_13_12_00_122245%2Fvideos%2F00000_129642815%2Fthumb.webp?st=2025-03-13T10%3A51%3A50Z&amp;se=2025-03-19T11%3A51%3A50Z&amp;sks=b&amp;skt=2025-03-13T10%3A51%3A50Z&amp;ske=2025-03-19T11%3A51%3A50Z&amp;sktid=a48cca56-e6da-484e-a814-9c849652bcb3&amp;skoid=8ebb0df1-a278-4e2e-9c20-f2d373479b3a&amp;skv=2019-02-02&amp;sv=2018-11-09&amp;sr=b&amp;sp=r&amp;spr=https%2Chttp&amp;sig=IN2Jd19Mgx3rHcsWhhVK4kogV79%2BukctQkQjg1oWUJk%3D&amp;az=oaivgprodscus" class="h-full w-full object-cover" alt="Generation placeholder" style="display: none;"></div></div><div class="absolute left-0 top-0 h-full w-full"></div><div class="absolute left-0 top-0 h-full w-full transition-opacity opacity-100"></div></div></div></div></div></a></div></div>
+  */
+
+function doRemixF (msg) {
+    const uuid = msg.uuid;
+    const xpath = msg.xpath;
+    if (uuid === _uuid_ ) {
+        /*
+        const remix_btn = findElements ('div', 'class', /w\-full\struncate/, /Remix/);
+        if (remix_btn) {
+            remix_btn.click ();
+        }
+        */
+        //const resolution = msg.resolution;
+        //const duration = msg.duration;
+        //const remix = msg.remix;
+        //simulateKeyPress ('r');
+        //invokeCtlFromXPath (xpath); // set focus remix_window.click ()
+        //setResolution (msg);
+        //setTotalNewVideos(msg);
+        //setRemixStrength (msg);
+        // generate video ...
+        // wait for video [body] to generate ...
+        // navigate to new video url
+        // add to Favorites
+        // get video title
+        // doDownload (); // d/l [video].mp4
+        // doDownload (); // d/l [video].log (title + english prompt [+ prompt])
+        /*
+        // close window
+        port.postMessage ({
+            //action:"videoCompleted",
+            action:"downloadCompleted",
+            uuid: uuid,
+            title: newVideoTitleW,
+            prompt: prompt,
+            resolution: resolution,
+            duration: duration,
+            remix: remix
+        });
+        */
+    } // end if(uuid === _uuid_ )
+} // end doRemixF
+
+function downloadLog (msg) {
+    const totalVideosInt64 = totalLikesInt64.length;
+    const fileTitle = `${totalVideosInt64}-${message.videoTitle.replace(/[\W\s]/g, '_')}.log`;
+    const fileContents = JSON.stringify (message, null, 2);
+    const blob = new Blob ([fileContents], { type: 'application/json' });
+    const videoUrl = URL.createObjectURL (blob);
+    chrome.downloads.download ({
+        url: videoUrl,
+        filename: fileTitle,   // Save as this name in the user's Downloads folder
+        saveAs: false           // No Save As dialog, download automatically
+    }, (downloadId) => {
+      if (chrome.runtime.lastError || !downloadId) {
+          console.error('Download failed:', chrome.runtime.lastError);
+      } else {
+            // Monitor the download until it’s complete.
+            chrome.downloads.onChanged.addListener(function onChanged(delta) {
+                if (delta.id === downloadId && delta.state && delta.state.current === 'complete') {
+                    // Download is complete&#8203;:contentReference[oaicite:15]{index=15}.
+                    chrome.downloads.onChanged.removeListener(onChanged);
+                    console.info (`${totalVideosInt64}. video log downloaded.`);
+                    /*
+                    // Get the file size from the download item
+                    chrome.downloads.search({ id: downloadId }, function(results) {
+                        let fileSizeBytes = results && results[0] ? results[0].fileSize : 0;
+                        let fileSizeMB = fileSizeBytes ? (fileSizeBytes / (1024*1024)).toFixed(2) + ' MB' : '';
+                        
+                        // Find an open YouTube tab.
+                        chrome.tabs.query({ url: "*://*.youtube.com/*" }, function(tabs) {
+                            if (tabs.length === 0) {
+                                console.warn('No open YouTube tab found. Opening a new one.');
+                                openTab({ url: "https://www.youtube.com/upload" });
+                            } else {
+                                // Use the first YouTube tab found (could refine to specific tab if needed).
+                                let ytTab = tabs[0];
+                                // Navigate it to the upload page (if not already there).
+                                chrome.tabs.update(ytTab.id, { url: "https://www.youtube.com/upload", active: false }, 
+                                updatedTab => {
+                                    ;;
+                                });
+                            }
+                        });
+                    });
+                    */
+                } // end if (delta.id === downloadId ... )
+            }); // end chrome.downloads.onChanged.addListener
+            // cleanup url //
+            setTimeout (() => {URL.revokeObjectURL(videoUrl)});
+        } // end if/else
+    }); // end chrome.downloads.download
+} // end downloadLog
 /*
 const port = chrome.runtime.connect ({ name: "google-translate" });
 port.onMessage.addListener((message, sender, sendResponse) => {

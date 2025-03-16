@@ -58,15 +58,7 @@ function dataIndexElementClicked(event) {
             port.postMessage({
                 action: 'DataIndexElementClicked',
                 dataIndex: dataIndexValue,
-                url: url //,
-                /* 
-                element: dataIndexElement
-                dataIndex: dataIndexValue,
-                elementText: dataIndexElement.textContent.substring(0, 100), // Limit text length
-                tagName: dataIndexElement.tagName,
-                url: window.location.href,
-                timestamp: new Date().toISOString()
-                */
+                url: url 
             });
         }
         catch (e) {
@@ -123,20 +115,3 @@ if (document.readyState === 'loading') {
     // If DOM is already loaded
     parseBody();
 } // end if (document.readyState === 'loading')
-
-/*
-
-  /*
-  document.readyState = 'complete'; // 'loading', 'interactive'
-
-  const elemsWithID = document.querySelectorAll("[data-index]");
-
-  elemsWithID.forEach(eem => {});
-
-  data-index="7"
-  /html/body/main/div/div[1]/div/div/div[2]/div/div/div[2]/div/div[1]/div[8]/div/div/div/div/div[2]/div[3]
-  /html/body/main/div/div[1]/div/div/div[2]/div/div/div[2]/div/div[1]/div[9]/div/div/div/div/div[2]/div[3]
-
-  * /
-  <div class="h-full w-full"><div class="group relative h-full w-full animate-pulse bg-gray-200"><a href="/g/gen_01jp7p21vmfqtt5sc8z1afwr9r"><div class="relative h-full w-full"><div class="relative h-full w-full" style="aspect-ratio: 1.77917 / 1;"><div class="absolute left-0 top-0 h-full w-full"><div class="relative h-full w-full"><div class="absolute left-0 top-0 h-full w-full"><div class="relative h-full w-full animate-pulse bg-secondary/20"><img src="https://videos.openai.com/vg-assets/assets%2Ftask_01jp7p0cvcecj9v89t11zsc5rh%2Ftask_01jp7p0cvcecj9v89t11zsc5rh_genid_d2d870bf-ed2a-4104-88c8-bfecfdc148a9_25_03_13_12_00_122245%2Fvideos%2F00000_129642815%2Fthumb.webp?st=2025-03-13T10%3A51%3A50Z&amp;se=2025-03-19T11%3A51%3A50Z&amp;sks=b&amp;skt=2025-03-13T10%3A51%3A50Z&amp;ske=2025-03-19T11%3A51%3A50Z&amp;sktid=a48cca56-e6da-484e-a814-9c849652bcb3&amp;skoid=8ebb0df1-a278-4e2e-9c20-f2d373479b3a&amp;skv=2019-02-02&amp;sv=2018-11-09&amp;sr=b&amp;sp=r&amp;spr=https%2Chttp&amp;sig=IN2Jd19Mgx3rHcsWhhVK4kogV79%2BukctQkQjg1oWUJk%3D&amp;az=oaivgprodscus" class="h-full w-full object-cover" alt="Generation placeholder" style="display: none;"></div></div><div class="absolute left-0 top-0 h-full w-full"></div><div class="absolute left-0 top-0 h-full w-full transition-opacity opacity-100"></div></div></div></div></div></a></div></div>
-  */
