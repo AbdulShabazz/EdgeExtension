@@ -38,23 +38,15 @@ function Init () {
     document.addEventListener ('keydown', (keyCodeEvent) => {
         if (keyCodeEvent.shiftKey) { // [Shift] Youtube
             const input_field = document.querySelectorAll('div[id=textbox]');
-            const msg = messageQueue.shift ();
-            input_field[0].textContent = msg.videoTitle;
-            input_field[1].textContent.replace (/^(Prompt:.+)\n/, `${msg.prompt}`);
+            const msg = messageQueue[0];
+            const videoTitle = msg.videoTitle;
+            const prompt = input_field[1].textContent.replace (/^Prompt:.+\n/, `Prompt: ${msg.prompt}\n`);
+            const iid = setInterval(() => {
+                input_field[0].textContent = videoTitle;
+                input_field[1].textContent = prompt;
+            }, false); // end setInterval            
         } // end if (keyCodeEvent.shiftKey)
-    });
-    /*
-    const xpath = '/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-uploads-file-picker/div/ytcp-button/ytcp-button-shape/button';
-    const filePicker = document.evaluate(
-        xpath,
-        document,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-    );//document.getElementsByXPath ();//document.querySelectorAll('button')[13];
-    filePicker.click ();
-    */
-    //document.querySelectorAll('button')[13].click ();
+    }); // end addEventListener
     port.postMessage ({ action: "url-youtube" });
 } // end Init
 
