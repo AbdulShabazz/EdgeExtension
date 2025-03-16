@@ -28,7 +28,7 @@
       "js": ["query_likes_content_script.js"]
     },
     {
-      "matches": ["https://sora.com/g/*"],
+      "matches": ["https://sora.com/g/*", "https://sora.com/t/*"],
       "js": ["push_video_details_content_script.js"]
     },
     {
