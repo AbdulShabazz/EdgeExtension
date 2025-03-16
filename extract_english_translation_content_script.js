@@ -32,27 +32,16 @@ function connectPort() {
     port.onMessage.addListener((message, sender, sendResponse) => {
         switch (message.action) {
         case 'generateEnglishPrompt':
-            function buildPrompt () {
-                const inputText = document.querySelector('textarea');
-                const translatedText = document.querySelector('[jsname="W297wb"]');
-                if (!translatedText)
-                    return false;
-                if (translatedText != inputText){
-                    const langElement = document.querySelector('[class="VfPpkd-jY41G-V67aGc"]').textContent.replace(/\s*\-\s*Detected$/,'');
+            const inputText = document.querySelector('textarea[aria-label]');
+            observeDOMForNewElement ('[jsname="W297wb"]', (translatedText) => {
+                if (translatedText.textContent != inputText.textContent) {
+                    const langElement = document
+                      .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
+                      .textContent
+                      .replace(/\s*\-\s*Detected$/,'');
                     message.prompt = `${translatedText.textContent} (Original ${langElement} Prompt: ${message.prompt})`;
                 }
-                return true;
-            } // end buildPrompt
-            function siteReady (){
-                let iid = setTimeout (() => {
-                    if (buildPrompt ())
-                        clearTimeout (iid);
-                    else {
-                        siteReady ();
-                    };
-                }, 500);
-            } // end siteReady
-            siteReady ();
+            });
             message.action = "EnglishPromptCompleted";
             port.postMessage (message);
             break;
