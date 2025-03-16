@@ -14,25 +14,39 @@ function observeDOMForNewElement(selector, callback) {
     observer.observe(document.body, { childList: true, subtree: true });
 } // end observeDOMForNewElement
 
-const port = chrome.runtime.connect ({ name: "google-translate" });
-port.onMessage.addListener((message, sender, sendResponse) => {
-    switch (message.action) {
-        case 'generateEnglishPrompt':
-        const inputText = document.querySelector('textarea[aria-label]');
-        observeDOMForNewElement ('[jsname="W297wb"]', (translatedText) => {
-            if (translatedText.textContent != inputText.textContent) {
-                const langElement = document
-                  .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
-                  .textContent
-                  .replace(/\s*\-\s*Detected$/,'');
-                message.prompt = `${translatedText.textContent} (Original ${langElement} Prompt: ${message.prompt})`;
-            }
-        });
-        message.action = "EnglishPromptCompleted";
-        port.postMessage (message);
-        break;
-    }
-});
+let port;
+
+function connectPort (){
+    port = chrome.runtime.connect ({ name: "google-translate" });
+
+    port.onMessage.addListener((message, sender, sendResponse) => {
+        switch (message.action) {
+            case 'generateEnglishPrompt':
+            const inputText = document.querySelector('textarea[aria-label]');
+            observeDOMForNewElement ('[jsname="W297wb"]', (translatedText) => {
+                if (translatedText.textContent != inputText.textContent) {
+                    const langElement = document
+                    .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
+                    .textContent
+                    .replace(/\s*\-\s*Detected$/,'');
+                    message.prompt = `${translatedText.textContent} (Original ${langElement}: ${message.prompt})`;
+                }
+            });
+            message.action = "EnglishPromptCompleted";
+            port.postMessage (message);
+            break;
+        }
+    });
+        
+    // Add disconnection listener
+    port.onDisconnect.addListener(() => {
+        console.log("Port 'google-translate' disconnected. Reconnecting...");
+        // Optional: attempt to reconnect after a short delay
+        setTimeout(connectPort, 1);
+    });
+} // end connectPort
+
+connectPort ();
 
 function getElementByXPath (xpath) {
     let ret = null;

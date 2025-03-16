@@ -3,6 +3,7 @@
 let _uuid_ = "";
 let downloadID = null;
 let UI_BUTTON = {};
+let UI_RESULT_BUTTON = {};
 
 const addToFAVs_xpath = "//*[@id=\"radix-:r1s:\"]/div/div[2]/div/div/div/div[3]/div[1]/button";
 
@@ -20,14 +21,14 @@ document.addEventListener ('keydown', (keyCodeEvent) => {
 let port;
 
 // Function to establish connection
-function connectPort() {
+function connectPort(MSG) {
     port = chrome.runtime.connect({ name: "video-details" });
     
     // Add disconnection listener
     port.onDisconnect.addListener(() => {
         console.log("Port disconnected. Reconnecting...");
         // Optional: attempt to reconnect after a short delay
-        setTimeout(connectPort, 250);
+        setTimeout(connectPort, 1);
     });
     
     // Add message listener
@@ -36,31 +37,53 @@ function connectPort() {
         case 'doRemix':
             UI_BUTTON['remix'].click();
             const iid = setInterval(() => {
-            if (!keyCodeShift)
-                return;
-            clearInterval(iid);
-            
-            const urlSearch = "*://sora.com/*";
-            const url = "https://www.youtube.com/upload";
-            
-            // Check if port is connected before sending message
-            if (port && !chrome.runtime.lastError) {
-                try {
-                    const newVideoTitle = document.querySelector('div[class="truncate"]')?.textContent;                
-                    message.action = "url-navigate";
-                    message.videoTitle = `OpenAI Sora - ${newVideoTitle}`;
-                    message.url = url;
-                    message.urlSearch = urlSearch;
-                    port.postMessage(message);
-                } catch (err) {
-                    console.error("Error posting message:", err);
-                    // Attempt to reconnect
-                    connectPort();
+                if (!keyCodeShift)
+                    return;
+                clearInterval(iid);
+
+                let ui_buttons = document.querySelectorAll('button'); // (28) //
+                let I = ui_buttons.length-1;
+
+                UI_RESULT_BUTTON['settings'] = ui_buttons[I-0];
+                UI_RESULT_BUTTON['tasks'] = ui_buttons[I-1];
+                UI_RESULT_BUTTON['folder/report/archive'] = ui_buttons[I-2];
+                UI_RESULT_BUTTON['download'] = ui_buttons[I-3];
+                UI_RESULT_BUTTON['share/unpublish'] = ui_buttons[I-4];
+                UI_RESULT_BUTTON['downvote'] = ui_buttons[I-5];
+                UI_RESULT_BUTTON['like'] = ui_buttons[I-6];
+                UI_RESULT_BUTTON['favorite'] = ui_buttons[I-7];
+                UI_RESULT_BUTTON['menu'] = ui_buttons[I-6];
+                UI_RESULT_BUTTON['loop'] = ui_buttons[I-5];
+                UI_RESULT_BUTTON['blend'] = ui_buttons[I-4];
+                UI_RESULT_BUTTON['remix'] = ui_buttons[I-3];
+                UI_RESULT_BUTTON['recut'] = ui_buttons[I-2];
+                UI_RESULT_BUTTON['edit'] = ui_buttons[I-1];
+
+                // Update favorites
+                UI_RESULT_BUTTON['favorite'].click ();
+                
+                const urlSearch = "*://sora.com/*";
+                const url = "https://www.youtube.com/upload";
+                
+                // Check if port is connected before sending message
+                if (port && !chrome.runtime.lastError) {
+                    try {
+                        const newVideoTitle = document.querySelectorAll('div[class="truncate"]')[1];
+                        message = MSG || message; // connection reset ?
+                        message.action = "url-navigate";
+                        message.videoTitle = `OpenAI Sora - ${newVideoTitle.textContent}`;
+                        message.url = url;
+                        message.urlSearch = urlSearch;
+                        port.postMessage(message);
+                    } catch (err) {
+                        console.error("Error posting message:", err);
+                        // Attempt to reconnect
+                        connectPort();
+                    }
+                } else {
+                    console.log("Port disconnected, reconnecting before sending message");
+                    connectPort(message);
                 }
-            } else {
-                console.log("Port disconnected, reconnecting before sending message");
-                connectPort();
-            }
             }, 1);
             break;
 
@@ -475,16 +498,17 @@ function parseBody () {
         return;
     clearInterval (intID);
     let ui_buttons = document.querySelectorAll('button'); // (17) //
-    let I = ui_buttons.length;
+    let I = ui_buttons.length-1;
     UI_BUTTON['settings'] = ui_buttons[I-0];
     UI_BUTTON['tasks'] = ui_buttons[I-1];
-    UI_BUTTON['report'] = ui_buttons[I-2];
-    UI_BUTTON['favorite'] = ui_buttons[I-4];
-    UI_BUTTON['menu'] = ui_buttons[I-5];
-    UI_BUTTON['loop'] = ui_buttons[I-6];
-    UI_BUTTON['blend'] = ui_buttons[I-7];
-    UI_BUTTON['remix'] = ui_buttons[I-8];
-    UI_BUTTON['recut'] = ui_buttons[I-9];
+    UI_BUTTON['folder/report/archive'] = ui_buttons[I-2];
+    UI_BUTTON['like'] = ui_buttons[I-3];
+    UI_BUTTON['menu'] = ui_buttons[I-4];
+    UI_BUTTON['loop'] = ui_buttons[I-5];
+    UI_BUTTON['blend'] = ui_buttons[I-6];
+    UI_BUTTON['remix'] = ui_buttons[I-7];
+    UI_BUTTON['recut'] = ui_buttons[I-8];
+    UI_BUTTON['storyboard'] = ui_buttons[I-9];
     UI_BUTTON['edit'] = ui_buttons[I-10];
     // Init bg listener
     port.postMessage ({
