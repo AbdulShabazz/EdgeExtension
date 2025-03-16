@@ -69,7 +69,7 @@ function stripSymbols (promptW) {
       .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF\u2190-\u21FF\u2500-\u257F\u2B50-\u2BFF\uFE0F]/gu, '')
       .replace(/\s+/g, ' ')
       .substring (0, MAXLENGTH);
-    return `${prompt}${(promptW < MAXLENGTH ? '' : ' ...')}`;
+    return `${prompt}${(promptW.length < MAXLENGTH ? '' : ' ...')}`;
 } // end stripSymbols
 
 function downloadLog (msg) {
