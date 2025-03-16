@@ -14,7 +14,7 @@ function connectPort() {
     port.onDisconnect.addListener(() => {
         console.log("Port disconnected. Reconnecting...");
         // Optional: attempt to reconnect after a short delay
-        setTimeout(connectPort, 250);
+        setTimeout(connectPort, 1);
     });
     
     // Add message listener
