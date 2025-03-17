@@ -1,4 +1,47 @@
-
+port.onMessage.addListener((message, sender, sendResponse) => {
+    message = MSG || message; // message cached ?
+    switch (message.action) {
+        case 'generateEnglishPrompt':
+            const inputText = document.querySelector('textarea[aria-label]');
+            //document.querySelectorAll('span[jsname="jqKxS"')[0].textContent;
+            //document.querySelectorAll('span[jsname="W297wb"')[0].textContent;
+            //if (inputText) {
+                observeDOMForNewElement ('[jsname="W297wb"]', (_) => {
+                    const translatedText = Array
+                        .from (document.querySelectorAll('span[jsname="txFAF"]'))
+                        .map ((sentence) => sentence.textContent)
+                        .join (' ');
+                    if (translatedText.textContent && (translatedText.textContent != inputText.textContent)) {
+                        const langElement = document
+                        .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
+                        .textContent
+                        .replace(/\s*\-\s*Detected$/,'');
+                        message.prompt = `${translatedText.textContent} (Original ${langElement}: ${message.prompt})`;
+                    }
+                    message.prompt = message.prompt || message.videoTitle; // Non empty prompts //
+                    message.action = "EnglishPromptCompleted";
+                    if (port)
+                        port.postMessage (message);
+                    else {
+                        connectPort ();
+                        port.postMessage (message);
+                    }
+                });
+                /*
+            } else {
+                message.prompt = message.prompt || message.videoTitle; // No empty prompts //
+                message.action = "EnglishPromptCompleted";
+                if (port)
+                    port.postMessage (message);
+                else {
+                    connectPort ();
+                    port.postMessage (message);
+                }
+            }
+                */
+            break;
+    }
+});
 
 /*
 
