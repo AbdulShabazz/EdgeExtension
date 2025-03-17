@@ -200,15 +200,21 @@ chrome.runtime.onConnect.addListener ((port) => {
                 case 'EnglishPromptCompleted':
                 const msg_3 = uploadQueue.shift ();
                 msg_3.prompt = message.prompt;
-                const url = msg_3.url = message.url;
-                const urlSearch = msg_3.urlSearch = message.urlSearch;
+                const url = msg_3.url = "https://www.youtube.com/upload";// message.url;
+                const urlSearch = msg_3.urlSearch = "*://www.youtube.com/*";// message.urlSearch;
                 uploadQueue.push (msg_3); 
-                openTab (url, true); // target Youtube.com/upload
+                //openTab (url, true); // target Youtube.com/upload
                 /*
+                BUG:
+
+                SYMP: there is a strange bug where after pressing SHIFT, you have to mouse over the google translate tab
+                    to open the Youtube upload window.
+                SOLU: ?? ??
+                */                
                 chrome.tabs.query({ url: urlSearch }, function(tabs) {
                     if (tabs.length === 0) {
-                        console.warn('No open translation tabs found. Opening a new one.');
-                        openTab (url); // open tab in the bg
+                        console.warn('No open youtube tabs found. Opening a new one.');
+                        openTab (url, true); // open tab in the f/g
                     } else {
                         // Use the first translate tab found
                         let translateTab = tabs[0];
@@ -217,12 +223,11 @@ chrome.runtime.onConnect.addListener ((port) => {
                             translateTab.id, 
                             { url: url, active: true }, 
                             function (updatedTab) {
-                                console.log('Updating existing translate.google.com tab...');
+                                console.log('Updating existing Youtube tab...');
                             }
                         );
                     }
                 });
-                */
                 break;
 
                 case 'url-youtube': // site-ready //
