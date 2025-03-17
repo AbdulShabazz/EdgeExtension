@@ -21,19 +21,23 @@
   "content_scripts": [
     {
       "matches": ["https://translate.google.com/*"],
-      "js": ["extract_english_translation_content_script.js"]
+      "js": ["extract_english_translation_content_script.js"],
+      "run_at": "document_idle"
     },
     {
       "matches": ["https://sora.com/explore/recent/*"],
-      "js": ["query_likes_content_script.js"]
+      "js": ["query_likes_content_script.js"],
+      "run_at": "document_idle"
     },
     {
       "matches": ["https://sora.com/g/*", "https://sora.com/t/*"],
-      "js": ["push_video_details_content_script.js"]
+      "js": ["push_video_details_content_script.js"],
+      "run_at": "document_idle"
     },
     {
       "matches": ["https://*.youtube.com/*"],
-      "js": ["upload_video_content_script.js"]
+      "js": ["upload_video_content_script.js"],
+      "run_at": "document_idle"
     }
   ],
   "action": {
