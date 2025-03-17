@@ -23,24 +23,25 @@ function connectPort (MSG){
         message = MSG || message; // message cached ?
         switch (message.action) {
             case 'generateEnglishPrompt':
-            const inputText = document.querySelector('textarea[aria-label]');
-            observeDOMForNewElement ('[jsname="W297wb"]', (translatedText) => {
-                if (translatedText.textContent != inputText.textContent) {
-                    const langElement = document
-                    .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
-                    .textContent
-                    .replace(/\s*\-\s*Detected$/,'');
-                    message.prompt = `${translatedText.textContent} (Original ${langElement}: ${message.prompt})`;
-                }
-                message.action = "EnglishPromptCompleted";
-                if (port)
-                    port.postMessage (message);
-                else {
-                    connectPort ();
-                    port.postMessage (message);
-                }
-            });
-            break;
+                const inputText = document.querySelector('textarea[aria-label]');
+                observeDOMForNewElement ('[jsname="W297wb"]', (translatedText) => {
+                    if (translatedText.textContent != inputText.textContent) {
+                        const langElement = document
+                        .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
+                        .textContent
+                        .replace(/\s*\-\s*Detected$/,'');
+                        message.prompt = `${translatedText.textContent} (Original ${langElement}: ${message.prompt})`;
+                    }
+                    message.prompt = message.prompt || message.videoTitle; // No empty prompts //
+                    message.action = "EnglishPromptCompleted";
+                    if (port)
+                        port.postMessage (message);
+                    else {
+                        connectPort ();
+                        port.postMessage (message);
+                    }
+                });
+                break;
         }
     });
         
