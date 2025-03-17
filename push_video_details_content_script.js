@@ -13,6 +13,9 @@ document.addEventListener ('keydown', (keyCodeEvent) => {
     if (keyCodeEvent.shiftKey) { // [Shift] Youtube
         keyCodeShift = true;
     } // end if (document.location.href...)
+    else {
+        keyCodeShift = false;
+    }
 }, 1);
 
 // content.js (runs on video-gens.com pages)
@@ -28,7 +31,7 @@ function connectPort(MSG) {
     port.onDisconnect.addListener(() => {
         console.log("Port disconnected. Reconnecting...");
         // Optional: attempt to reconnect after a short delay
-        setTimeout(connectPort, 1);
+        setTimeout(connectPort, 10);
     });
     
     // Add message listener
@@ -39,7 +42,6 @@ function connectPort(MSG) {
             const iid = setInterval(() => {
                 if (!keyCodeShift)
                     return;
-                clearInterval(iid);
 
                 let ui_buttons = document.querySelectorAll('button'); // (28) //
                 let I = ui_buttons.length-1;
@@ -52,12 +54,12 @@ function connectPort(MSG) {
                 UI_RESULT_BUTTON['downvote'] = ui_buttons[I-5];
                 UI_RESULT_BUTTON['like'] = ui_buttons[I-6];
                 UI_RESULT_BUTTON['favorite'] = ui_buttons[I-7];
-                UI_RESULT_BUTTON['menu'] = ui_buttons[I-6];
-                UI_RESULT_BUTTON['loop'] = ui_buttons[I-5];
-                UI_RESULT_BUTTON['blend'] = ui_buttons[I-4];
-                UI_RESULT_BUTTON['remix'] = ui_buttons[I-3];
-                UI_RESULT_BUTTON['recut'] = ui_buttons[I-2];
-                UI_RESULT_BUTTON['edit'] = ui_buttons[I-1];
+                UI_RESULT_BUTTON['menu'] = ui_buttons[I-8];
+                UI_RESULT_BUTTON['loop'] = ui_buttons[I-9];
+                UI_RESULT_BUTTON['blend'] = ui_buttons[I-10];
+                UI_RESULT_BUTTON['remix'] = ui_buttons[I-11];
+                UI_RESULT_BUTTON['recut'] = ui_buttons[I-12];
+                UI_RESULT_BUTTON['edit'] = ui_buttons[I-13];
 
                 // Update favorites
                 UI_RESULT_BUTTON['favorite'].click ();
@@ -70,7 +72,7 @@ function connectPort(MSG) {
                     try {
                         const newVideoTitle = document.querySelectorAll('div[class="truncate"]')[1];
                         message = MSG || message; // connection reset ?
-                        message.action = "url-navigate";
+                        message.action = "openTranslationTab";
                         message.videoTitle = `OpenAI Sora - ${newVideoTitle.textContent}`;
                         message.url = url;
                         message.urlSearch = urlSearch;
@@ -84,7 +86,10 @@ function connectPort(MSG) {
                     console.log("Port disconnected, reconnecting before sending message");
                     connectPort(message);
                 }
-            }, 1);
+                
+                clearInterval(iid);
+
+            }, 60);
             break;
 
         case 'startUpload':
@@ -450,11 +455,11 @@ function getValueFromXPath(xpath) {
 function parseBody () {
     // Send message to background script to initiate video remix.
     const resolutionW = getValueFromXPath(resolution_xpath);
+    if (resolutionW === '')
+        return;
     const durationW = getValueFromXPath(duration_xpath);
     const promptW = getValueFromXPath(prompt_xpath);
     const videoTitleW = _uuid_ = getValueFromXPath(videoName_xpath);
-    if (resolutionW === '')
-        return;
     clearInterval (intID);
     let ui_buttons = document.querySelectorAll('button'); // (17) //
     let I = ui_buttons.length-1;

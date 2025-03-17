@@ -6,7 +6,7 @@ let port = chrome.runtime.connect ({ name: "recent-videos" });
 port.onDisconnect.addListener(() => {
     console.log("Port 'recent-videos' disconnected. Reconnecting...");
     // Optional: attempt to reconnect after a short delay
-    setTimeout(() => { port = chrome.runtime.connect ({ name: "recent-videos" }) }, 1);
+    setTimeout(() => { port = chrome.runtime.connect ({ name: "recent-videos" }) }, 10);
 });
 
 // Function to query all elements with data-index and report them

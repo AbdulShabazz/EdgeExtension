@@ -1,9 +1,10 @@
 
 // background.js (runs as a service worker in Edge/Chrome extension)
 
-let buffer = [];
+let buffer = {};
 let uploadQueue = [];
 let activePorts = {};
+let activeTabId = null;
 let InprocessQueue = [];
 let totalLikesInt64 = new Set ();
 
@@ -23,11 +24,17 @@ function updateLikes (u) {
     return ret;
 } // end updateLikes
 
-function openTab (url) {
-    chrome.tabs.create({ url: url, active: false }, tab => {
-        tab;
+function openTab (url, setActiveTab = false) {
+    chrome.tabs.create({ url: url, active: setActiveTab }, tab => {
+        buffer[tab.id] = {};
     });
 } // end openTab
+
+function monitorTabs() {
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (activeTabs) => {        
+        activeTabId = activeTabs.length > 0 ? activeTabs[0].id : null;
+    });
+} // end monitorTabs
 
 function preEvaluateVideo () {
     //const dataIndex = msg.element.getAttribute('data-index');
@@ -35,11 +42,11 @@ function preEvaluateVideo () {
         return;
     const msg = InprocessQueue.shift ();
     if (updateLikes (msg?.dataIndex)) {
-        openTab (msg.url);
+        openTab (msg.url, true);
     }
 } // end preEvaluateVideo
 
-function calcResolutionAndDuration (res,dur) {
+function calcVideoDetails (res,dur) {
     let status = 'skip';
     let resolution = 720;
     let duration = 5;
@@ -117,7 +124,7 @@ function findTabByURL (url, allowNewTab = true, cb) {
     return ret;
 } // end findTabByURL
 
-function standardizeEnglishPrompt (message) {
+function openTranslationTab (message) {
     // Find an open YouTube tab.
     const urlSearch = "*://translate.google.com/*";
     const url = `https://translate.google.com/?sl=auto&tl=en&op=translate&text=${message.prompt}`;
@@ -155,55 +162,52 @@ chrome.runtime.onConnect.addListener ((port) => {
                 break;
 
                 case 'videoFound':
-                message.prompt = stripSymbols(message.prompt);
-                standardizeEnglishPrompt (message);
-                message.action = 'generateEnglishPrompt';
                 // cache workload //
-                buffer.push (message);
+                if (activeTabId){
+                    buffer[activeTabId] = message;
+                    message.action = 'doRemix';
+                    activePorts['video-details'].postMessage(message);
+                }
                 break;
 
-                case 'translateSiteReady':
-                activePorts['google-translate'].postMessage (buffer.shift());
-                break;
-
-                case 'EnglishPromptCompleted':
-                const uuid = message.uuid;
-                const tmpResolutionW = message.resolution;
-                const tmpDurationW = message.duration;
-                const videoTitleW = message.videoTitle;
-                const prompt = message.prompt;
-                const { status, resolution, duration, remix } = calcResolutionAndDuration (tmpResolutionW, tmpDurationW);
-                const msg_body = {
-                    action: "doRemix",
-                    uuid: uuid,
-                    videoTitle: videoTitleW,
-                    prompt: prompt,
-                    resolution: resolution,
-                    duration: duration,
-                    remix: remix
-                };
-                const msg_upload_body = {
-                    action: "startUpload",
-                    uuid: uuid,
-                    videoTitle: videoTitleW,
-                    prompt: prompt,
-                    resolution: resolution,
-                    duration: duration,
-                    remix: remix
-                };
-                //uploadQueue.push (msg_upload_body);
-                if (status == 'continue') {
-                    activePorts['video-details'].postMessage(msg_body);
+                case 'openTranslationTab':
+                const msg = buffer[activeTabId];
+                msg.prompt = stripSymbols(msg.prompt);
+                msg.action = 'generateEnglishPrompt';
+                msg.url = message.url;
+                msg.urlSearch = message.urlSearch;
+                const uuid = msg.uuid;
+                const tmpResolutionW = msg.resolution;
+                const tmpDurationW = msg.duration;
+                const videoTitleW = msg.videoTitle = message.videoTitle;
+                const prompt = msg.prompt;
+                const { status, resolution, duration, remix } = calcVideoDetails (tmpResolutionW, tmpDurationW);
+                if (status == 'continue') {    
+                    msg.resolution = resolution;
+                    msg.duration = duration;
+                    msg.remix = remix;
+                    buffer[activeTabId] = msg;
+                    uploadQueue.push (msg);
+                    openTranslationTab (msg);
                 } // end if (status == 'continue')
                 break;
 
-                case 'url-navigate':
-                const url = message.url;
-                const urlSearch = message.urlSearch;
-                uploadQueue.push (message);
+                case 'translateSiteReady':
+                const msg_2 = uploadQueue[0];
+                activePorts['google-translate'].postMessage (msg_2); // target translate.google.com
+                break;
+
+                case 'EnglishPromptCompleted':
+                const msg_3 = uploadQueue.shift ();
+                msg_3.prompt = message.prompt;
+                const url = msg_3.url = message.url;
+                const urlSearch = msg_3.urlSearch = message.urlSearch;
+                uploadQueue.push (msg_3); 
+                openTab (url, true); // target Youtube.com/upload
+                /*
                 chrome.tabs.query({ url: urlSearch }, function(tabs) {
                     if (tabs.length === 0) {
-                        console.warn('No open translate tab found. Opening a new one.');
+                        console.warn('No open translation tabs found. Opening a new one.');
                         openTab (url); // open tab in the bg
                     } else {
                         // Use the first translate tab found
@@ -218,12 +222,13 @@ chrome.runtime.onConnect.addListener ((port) => {
                         );
                     }
                 });
+                */
                 break;
 
                 case 'url-youtube': // site-ready //
-                const msg_2 = uploadQueue.shift ();
-                msg_2.action = "startUpload";
-                activePorts['youtube-upload'].postMessage (msg_2);
+                const msg_4 = uploadQueue.shift ();
+                msg_4.action = "startUpload";
+                activePorts['youtube-upload'].postMessage (msg_4);
                 break;
 
                 case 'downloadCompleted':
@@ -240,6 +245,9 @@ chrome.runtime.onConnect.addListener ((port) => {
 
             // Periodically check for new videos (small overhead)
             setInterval(preEvaluateVideo, 1);
+
+            // Periodically document the current active tab (small overhead)
+            setInterval(monitorTabs, 1);
         }
         catch (e) {
           
@@ -248,8 +256,9 @@ chrome.runtime.onConnect.addListener ((port) => {
         return true;
     }); // end port.onMessage.addListener
     port.onDisconnect.addListener (() => {
-        console.info ('background.js connection to background service worker port, disconnected.')
-    }); // end port.onDisconnect
+        console.info ('background.js connection to background service worker port, disconnected. Reconnecting...')
+        port = chrome.runtime.connect({ name: "service-worker" });
+    }, 10); // end port.onDisconnect
 }); // end chrome.runtime.onConnect
 
 // Helper function to message the YouTube content script once the upload page is loaded.
