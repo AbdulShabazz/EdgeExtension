@@ -127,7 +127,7 @@ function findTabByURL (url, allowNewTab = true, cb) {
 function openTranslationTab (message) {
     // Find an open YouTube tab.
     const urlSearch = "*://translate.google.com/*";
-    const url = `https://translate.google.com/?sl=auto&tl=en&op=translate&text=${message.prompt}`;
+    const url = `https://translate.google.com/?sl=auto&tl=en&op=translate&text=${encodeURIComponent (message.prompt)}`;
     chrome.tabs.query({ url: urlSearch }, function(tabs) {
         if (tabs.length === 0) {
             console.warn('No open translate tab found. Opening a new one.');
