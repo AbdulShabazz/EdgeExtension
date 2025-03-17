@@ -8,8 +8,8 @@ let activeTabId = null;
 let InprocessQueue = [];
 let totalLikesInt64 = new Set ();
 
-chrome.alarms.create("keepAlive", { periodInMinutes: 1 });
-chrome.alarms.onAlarm.addListener ((alarm) => {});
+chrome.alarms.create("bg-keepAlive", { periodInMinutes: 0.5 });
+chrome.alarms.onAlarm.addListener ((alarm) => { console.info ("keep alive (background.js)")});
 
 function generateVideo (details) {
 
@@ -153,10 +153,6 @@ chrome.runtime.onConnect.addListener ((port) => {
     port.onMessage.addListener((message, sender, sendResponse) => {
         try {
             switch (message.action) {
-                case 'NewDataIndexElementsFound':
-                  ;;
-                break;
-
                 case 'DataIndexElementClicked':
                 InprocessQueue.push (message);
                 break;
