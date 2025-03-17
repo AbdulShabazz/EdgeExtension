@@ -24,6 +24,8 @@ function connectPort (MSG){
         switch (message.action) {
             case 'generateEnglishPrompt':
                 const inputText = document.querySelector('textarea[aria-label]');
+                //document.querySelectorAll('span[jsname="jqKxS"')[0].textContent;
+                //document.querySelectorAll('span[jsname="W297wb"')[0].textContent;
                 observeDOMForNewElement ('[jsname="W297wb"]', (translatedText) => {
                     if (translatedText.textContent != inputText.textContent) {
                         const langElement = document
