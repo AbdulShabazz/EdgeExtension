@@ -16,10 +16,11 @@ function observeDOMForNewElement(selector, callback) {
 
 let port;
 
-function connectPort (){
+function connectPort (MSG){
     port = chrome.runtime.connect ({ name: "google-translate" });
 
     port.onMessage.addListener((message, sender, sendResponse) => {
+        message = MSG || message; // message cached ?
         switch (message.action) {
             case 'generateEnglishPrompt':
             const inputText = document.querySelector('textarea[aria-label]');
@@ -31,9 +32,14 @@ function connectPort (){
                     .replace(/\s*\-\s*Detected$/,'');
                     message.prompt = `${translatedText.textContent} (Original ${langElement}: ${message.prompt})`;
                 }
+                message.action = "EnglishPromptCompleted";
+                if (port)
+                    port.postMessage (message);
+                else {
+                    connectPort ();
+                    port.postMessage (message);
+                }
             });
-            message.action = "EnglishPromptCompleted";
-            port.postMessage (message);
             break;
         }
     });
@@ -42,7 +48,7 @@ function connectPort (){
     port.onDisconnect.addListener(() => {
         console.log("Port 'google-translate' disconnected. Reconnecting...");
         // Optional: attempt to reconnect after a short delay
-        setTimeout(connectPort, 1);
+        setTimeout(connectPort, 10);
     });
 } // end connectPort
 
