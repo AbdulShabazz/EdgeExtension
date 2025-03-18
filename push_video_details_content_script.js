@@ -7,14 +7,16 @@ let UI_RESULT_BUTTON = {};
 
 let keyCodeShift = false;
 
-document.addEventListener ('keydown', (keyCodeEvent) => {
+function onKeyDown (keyCodeEvent) {
     if (keyCodeEvent.shiftKey) { // [Shift] Youtube
         keyCodeShift = true;
     } // end if (document.location.href...)
     else {
         keyCodeShift = false;
     }
-}, 1);
+} // end onKeyDown
+
+document.addEventListener ('keydown', onKeyDown, { passive: true });
 
 // content.js (runs on video-gens.com pages)
 
@@ -200,4 +202,4 @@ function parseBody () {
     });
 } // end parseBody
 
-let intID = setInterval(parseBody, false);
+let intID = setInterval(parseBody, 1);

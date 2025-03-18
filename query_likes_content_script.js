@@ -62,7 +62,7 @@ function parseBody () {
     /* const initialElements = */ //queryHTMLElements();
 
     // Add a click event listener to the document
-    document.addEventListener('click', dataIndexElementClicked, true);
+    document.addEventListener('click', dataIndexElementClicked, { passive: true });
 
     console.log('Data index element tracker initialized');
 
