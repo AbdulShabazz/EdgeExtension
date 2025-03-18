@@ -56,16 +56,22 @@ function dataIndexElementClicked(event) {
     } // end if (dataIndexElement)
 } // end dataIndexElementClicked
 
+let lastEvent;
+
 // Initialize the content script
 function parseBody () {
     // Query initial elements with data-index
-    /* const initialElements = */ //queryHTMLElements();
-
     // Add a click event listener to the document
-    document.addEventListener('click', dataIndexElementClicked, { passive: true });
-
+    document.addEventListener('click', (event) => {
+        lastEvent = event;
+        // limit execution to once per animation frame
+        requestAnimationFrame(() => {
+            if (lastEvent) {
+                dataIndexElementClicked (lastEvent);
+            }
+        });        
+    }, { passive: true });
     console.log('Data index element tracker initialized');
-
 } // end parseBody
 
 // Run initialization based on document state
