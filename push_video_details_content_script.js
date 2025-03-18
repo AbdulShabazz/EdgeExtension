@@ -5,8 +5,6 @@ let downloadID = null;
 let UI_BUTTON = {};
 let UI_RESULT_BUTTON = {};
 
-const addToFAVs_xpath = "//*[@id=\"radix-:r1s:\"]/div/div[2]/div/div/div/div[3]/div[1]/button";
-
 let keyCodeShift = false;
 
 document.addEventListener ('keydown', (keyCodeEvent) => {
@@ -76,7 +74,7 @@ function connectPort(MSG) {
                         message.videoTitle = `OpenAI Sora - ${newVideoTitle.textContent}`;
                         message.url = url;
                         message.urlSearch = urlSearch;
-                        port.postMessage(message);
+                        postMessageW(message);
                     } catch (err) {
                         console.error("Error posting message:", err);
                         // Attempt to reconnect
@@ -110,6 +108,19 @@ function connectPort(MSG) {
 
 // Initialize connection
 connectPort();
+
+function postMessageW (message){
+    if (port)
+        port.postMessage (message);
+    else {
+        connectPort ();
+        port.postMessage (message);
+    }
+} // end postMessageW
+
+window.addEventListener ("beforeunload", () => {
+    postMessageW ({ action: "release-tabID" });
+});
 
 // Video Details
 const videoName_xpath = "/html/body/main/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div[3]/div"; // name
@@ -179,7 +190,7 @@ function parseBody () {
     UI_BUTTON['storyboard'] = ui_buttons[I-9];
     UI_BUTTON['edit'] = ui_buttons[I-10];
     // Init bg listener
-    port.postMessage ({
+    postMessageW ({
         action: 'videoFound',
         uuid: videoTitleW,
         videoTitle: videoTitleW,

@@ -154,94 +154,102 @@ chrome.runtime.onConnect.addListener ((port) => {
         try {
             switch (message.action) {
                 case 'DataIndexElementClicked':
-                InprocessQueue.push (message);
-                break;
+                    InprocessQueue.push (message);
+                    break;
 
                 case 'videoFound':
-                // cache workload //
-                if (activeTabId){
-                    buffer[activeTabId] = message;
-                    message.action = 'doRemix';
-                    activePorts['video-details'].postMessage(message);
-                }
-                break;
+                    // cache workload //
+                    if (activeTabId){
+                        buffer[activeTabId] = message;
+                        message.action = 'doRemix';
+                        activePorts['video-details'].postMessage(message);
+                    }
+                    break;
 
                 case 'openTranslationTab':
-                const msg = buffer[activeTabId];
-                msg.prompt = stripSymbols(msg.prompt);
-                msg.action = 'generateEnglishPrompt';
-                msg.url = message.url;
-                msg.urlSearch = message.urlSearch;
-                const uuid = msg.uuid;
-                const tmpResolutionW = msg.resolution;
-                const tmpDurationW = msg.duration;
-                const videoTitleW = msg.videoTitle = message.videoTitle;
-                const prompt = msg.prompt;
-                const { status, resolution, duration, remix } = calcVideoDetails (tmpResolutionW, tmpDurationW);
-                if (status == 'continue') {    
-                    msg.resolution = resolution;
-                    msg.duration = duration;
-                    msg.remix = remix;
-                    buffer[activeTabId] = msg;
-                    uploadQueue.push (msg);
-                    openTranslationTab (msg);
-                } // end if (status == 'continue')
-                break;
+                    const msg = buffer[activeTabId];
+                    msg.prompt = stripSymbols(msg.prompt);
+                    msg.action = 'generateEnglishPrompt';
+                    msg.url = message.url;
+                    msg.urlSearch = message.urlSearch;
+                    const uuid = msg.uuid;
+                    const tmpResolutionW = msg.resolution;
+                    const tmpDurationW = msg.duration;
+                    const videoTitleW = msg.videoTitle = message.videoTitle;
+                    const prompt = msg.prompt;
+                    const { status, resolution, duration, remix } = calcVideoDetails (tmpResolutionW, tmpDurationW);
+                    if (status == 'continue') {    
+                        msg.resolution = resolution;
+                        msg.duration = duration;
+                        msg.remix = remix;
+                        buffer[activeTabId] = msg;
+                        uploadQueue.push (msg);
+                        openTranslationTab (msg);
+                    } // end if (status == 'continue')
+                    break;
 
                 case 'translateSiteReady':
-                const msg_2 = uploadQueue[0];
-                activePorts['google-translate'].postMessage (msg_2); // target translate.google.com
-                break;
+                    const msg_2 = uploadQueue[0];
+                    activePorts['google-translate'].postMessage (msg_2); // target translate.google.com
+                    break;
 
                 case 'EnglishPromptCompleted':
-                const msg_3 = uploadQueue.shift ();
-                msg_3.prompt = message.prompt;
-                const url = msg_3.url = "https://www.youtube.com/upload";// message.url;
-                const urlSearch = msg_3.urlSearch = "*://www.youtube.com/*";// message.urlSearch;
-                uploadQueue.push (msg_3); 
-                //openTab (url, true); // target Youtube.com/upload
-                /*
-                BUG:
+                    const msg_3 = uploadQueue.shift ();
+                    msg_3.prompt = message.prompt;
+                    const url = msg_3.url = "https://www.youtube.com/upload";// message.url;
+                    const urlSearch = msg_3.urlSearch = "*://www.youtube.com/*";// message.urlSearch;
+                    uploadQueue.push (msg_3); 
+                    //openTab (url, true); // target Youtube.com/upload
+                    /*
+                    BUG:
 
-                SYMP: there is a strange bug where after pressing SHIFT, you have to mouse over the google translate tab
-                    to open the Youtube upload window.
-                SOLU: ?? ??
-                */                
-                chrome.tabs.query({ url: urlSearch }, function(tabs) {
-                    if (tabs.length === 0) {
-                        console.warn('No open youtube tabs found. Opening a new one.');
-                        openTab (url, true); // open tab in the f/g
-                    } else {
-                        // Use the first translate tab found
-                        let translateTab = tabs[0];
-                        // Navigate it to the translate page (if not already there)
-                        chrome.tabs.update(
-                            translateTab.id, 
-                            { url: url, active: true }, 
-                            function (updatedTab) {
-                                console.log('Updating existing Youtube tab...');
-                            }
-                        );
-                    }
-                });
-                break;
-
-                case 'url-youtube': // site-ready //
-                const msg_4 = uploadQueue.shift ();
-                msg_4.action = "startUpload";
-                activePorts['youtube-upload'].postMessage (msg_4);
-                break;
-
-                case 'downloadCompleted':
-                chrome.tabs.query ({ url:message.url }, (tabs) => {
-                    tabs.forEach (tab => {
-                        if (tab.id) {
-                            chrome.tabs.update (tab.id, { url:'https://www.youtube.com/upload' });
+                    SYMP: there is a strange bug where after pressing SHIFT, you have to mouse over the google translate tab
+                        to open the Youtube upload window.
+                    SOLU: ?? ??
+                    */                
+                    chrome.tabs.query({ url: urlSearch }, function(tabs) {
+                        if (tabs.length === 0) {
+                            console.warn('No open youtube tabs found. Opening a new one.');
+                            openTab (url, true); // open tab in the f/g
+                        } else {
+                            // Use the first translate tab found
+                            let translateTab = tabs[0];
+                            // Navigate it to the translate page (if not already there)
+                            chrome.tabs.update(
+                                translateTab.id, 
+                                { url: url, active: true }, 
+                                function (updatedTab) {
+                                    console.log('Updating existing Youtube tab...');
+                                }
+                            );
                         }
                     });
-                });
-                downloadLog(message);
-                break;
+                    break;
+
+                case 'url-youtube': // site-ready //
+                    const msg_4 = uploadQueue.shift ();
+                    msg_4.action = "startUpload";
+                    activePorts['youtube-upload'].postMessage (msg_4);
+                    break;
+
+                case 'downloadCompleted':
+                    chrome.tabs.query ({ url:message.url }, (tabs) => {
+                        tabs.forEach (tab => {
+                            if (tab.id) {
+                                chrome.tabs.update (tab.id, { url:'https://www.youtube.com/upload' });
+                            }
+                        });
+                    });
+                    downloadLog(message);
+                    break;
+
+                case "release-tabID":
+                    if (activeTabId in buffer) {
+                        buffer[activeTabId] = null;
+                        delete buffer[activeTabId];
+                    }
+                    break;
+
             } // end switch (message.action)
 
             // Periodically check for new videos (small overhead)

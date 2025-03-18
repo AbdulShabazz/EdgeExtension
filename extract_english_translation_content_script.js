@@ -38,12 +38,7 @@ function connectPort (MSG){
                     }
                     message.prompt = message.prompt || message.videoTitle; // No empty prompts //
                     message.action = "EnglishPromptCompleted";
-                    if (port)
-                        port.postMessage (message);
-                    else {
-                        connectPort ();
-                        port.postMessage (message);
-                    }
+                    postMessageW (message,'cache');
                 });
                 break;
         }
@@ -58,6 +53,22 @@ function connectPort (MSG){
 } // end connectPort
 
 connectPort ();
+
+function postMessageW (message, cache = false){
+    if (port)
+        port.postMessage (message);
+    else if (cache){
+        connectPort (message);
+    }
+    else {
+        connectPort ();
+        port.postMessage (message);
+    }
+} // end postMessageW
+
+window.addEventListener ("beforeunload", () => {
+    postMessageW ({ action: "release-tabID" });
+});
 
 function getElementByXPath (xpath) {
     let ret = null;
@@ -84,12 +95,13 @@ function getValueFromXPath(xpath) {
 } // end getValueFromXPath
 
 function parseBody () {
+    // site ready ? //
     const textTranslatOption = getValueFromXPath(select_text_translate_xpath);
     if (textTranslatOption === '')
         return;
     clearInterval (intID);
     // Init bg listener
-    port.postMessage ({ action: "translateSiteReady" });
+    postMessageW ({ action: "translateSiteReady" });
 } // end parseBody
 
 let intID = setInterval(parseBody, false);

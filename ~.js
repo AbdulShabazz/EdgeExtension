@@ -1210,3 +1210,5 @@ port.onMessage.addListener((message, sender, sendResponse) => {
         break;
     }
 });
+
+const addToFAVs_xpath = "//*[@id=\"radix-:r1s:\"]/div/div[2]/div/div/div/div[3]/div[1]/button";

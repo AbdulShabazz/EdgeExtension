@@ -34,6 +34,19 @@ function connectPort() {
 // Initialize connection
 connectPort();
 
+function postMessageW (message){
+    if (port)
+        port.postMessage (message);
+    else {
+        connectPort ();
+        port.postMessage (message);
+    }
+} // end postMessageW
+
+window.addEventListener ("beforeunload", () => {
+    postMessageW ({ action: "release-tabID" });
+});
+
 function Init () {
     document.addEventListener ('keydown', (keyCodeEvent) => {
         if (keyCodeEvent.shiftKey) { // [Shift] Youtube
@@ -47,7 +60,7 @@ function Init () {
             }, false); // end setInterval            
         } // end if (keyCodeEvent.shiftKey)
     }); // end addEventListener
-    port.postMessage ({ action: "url-youtube" });
+    postMessageW ({ action: "url-youtube" });
 } // end Init
 
 // Run initialization based on document state

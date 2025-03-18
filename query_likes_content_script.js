@@ -9,6 +9,19 @@ port.onDisconnect.addListener(() => {
     setTimeout(() => { port = chrome.runtime.connect ({ name: "recent-videos" }) }, 10);
 });
 
+function postMessageW (message){
+    if (port)
+        port.postMessage (message);
+    else {
+        connectPort ();
+        port.postMessage (message);
+    }
+} // end postMessageW
+
+window.addEventListener ("beforeunload", () => {
+    postMessageW ({ action: "release-tabID" });
+});
+
 // Function to handle clicks on elements with data-index
 function dataIndexElementClicked(event) {
     // Find if the click was on an element with data-index or one of its descendants
@@ -30,7 +43,7 @@ function dataIndexElementClicked(event) {
         const dataIndexValue = dataIndexElement.getAttribute('data-index');       
         try {
             // Send a message to the background script
-            port.postMessage({
+            postMessageW ({
                 action: 'DataIndexElementClicked',
                 dataIndex: dataIndexValue,
                 url: url 
