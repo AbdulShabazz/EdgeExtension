@@ -38,7 +38,7 @@ function connectPort (MSG){
                     }
                     message.prompt = message.prompt || message.videoTitle; // No empty prompts //
                     message.action = "EnglishPromptCompleted";
-                    postMessageW (message);
+                    postMessageW (message,'cache');
                 });
                 break;
         }
@@ -54,9 +54,12 @@ function connectPort (MSG){
 
 connectPort ();
 
-function postMessageW (message){
+function postMessageW (message, cache = false){
     if (port)
         port.postMessage (message);
+    else if (cache){
+        connectPort (message);
+    }
     else {
         connectPort ();
         port.postMessage (message);
