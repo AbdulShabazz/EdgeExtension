@@ -1,13 +1,19 @@
 
 // Content script for Microsoft Edge extension
-let port = chrome.runtime.connect ({ name: "recent-videos" });
-    
-// Add disconnection listener
-port.onDisconnect.addListener(() => {
-    console.log("Port 'recent-videos' disconnected. Reconnecting...");
-    // Optional: attempt to reconnect after a short delay
-    setTimeout(() => { port = chrome.runtime.connect ({ name: "recent-videos" }) }, 10);
-});
+let port; 
+
+function connectPort () {
+    port = chrome.runtime.connect ({ name: "recent-videos" });
+        
+    // Add disconnection listener
+    port.onDisconnect.addListener(() => {
+        console.log("Port 'recent-videos' disconnected. Reconnecting...");
+        // Optional: attempt to reconnect after a short delay
+        setTimeout(connectPort, 1);
+    });
+}
+
+connectPort ();
 
 function postMessageW (message){
     if (port)
