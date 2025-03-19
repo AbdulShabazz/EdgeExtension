@@ -1,5 +1,61 @@
 
 
+function addClickHandler (element) {
+    //if (!element.visited) {
+        //element.visited = true;
+        const url = element.querySelectorAll('div > div > div > a')[0]?.href || '';
+        const dataIndexValue = element.getAttribute('data-index');  
+        element.onclick = function () {
+            // Send a message to the background script
+            postMessageW ({
+                action: 'DataIndexElementClicked',
+                dataIndex: dataIndexValue,
+                url: url 
+            });
+        } // end onclick
+    //} // end if (!element.visited)
+} // end addClickHandler
+
+function removeClickHandler (element) {
+    //if (!element.visited) {
+        //element.visited = null;
+        element.onclick = null;
+        //delete element.visited;
+    //} // end if (!element.visited)
+} // end removeClickHandler
+
+function updateElementClickHandlers (selector, mutations) {
+    mutations.forEach ((elements) => {
+        if (elements.addedNodes.length > 0) {
+            elements.addedNodes.forEach ((node) => {
+                const nodeAdded = (node.nodeType == 1 && node.hasAttribute (selector));
+                if (nodeAdded) {
+                    addClickHandler (node);
+                } // end if (node.nodeType == 1 ...)    }); // end mutations.addedNodes
+            }); // end mutations.addedNodes 
+        }
+        if (elements.removedNodes.length > 0) {
+            elements.removedNodes.forEach ((node) => {
+                const nodeRemoved = (node.nodeType == 1 && node.hasAttribute (selector));
+                if (nodeRemoved) {
+                    removeClickHandler (node);
+                } // end if (node.nodeType == 1 ...)
+            }); // end mutations.removedNodes
+        }
+    }) // end mutations.forEach
+} // end updateElementClickHandlers
+
+const observer = new MutationObserver((mutations) => {
+    return updateElementClickHandlers ("data-index", mutations);
+});
+
+try {
+    observer.observe(document.body.shadowRoot, { childList: true, subtree: true });
+}
+catch (e) {
+    console.info ("Observer failed:", e);
+}
+
 // Observes when the element first appears in the DOM
 function observeDOMForNewElement(selector, callback) {
     const observer = new MutationObserver(() => {
