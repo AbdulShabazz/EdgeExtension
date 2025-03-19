@@ -1,4 +1,18 @@
 
+let eventListeners = [];
+
+function trackEventListener (target, event, handler, options) {
+    target.addEventListener (event, handler, options);
+    eventListeners.push ({ target, event, handler, options });
+} // end trackEventListener
+
+function removeAllEventListeners () {
+    for ( const { target, event, handler, options } of eventListeners ) {
+        target.removeEventListener (event, handler, options);
+    }
+    eventListeners.length = 0;
+} // end removeAllEventListeners
+
 // globals
 let _uuid_ = "";
 let downloadID = null;
@@ -16,7 +30,7 @@ function onKeyDown (keyCodeEvent) {
     }
 } // end onKeyDown
 
-document.addEventListener ('keydown', onKeyDown, { passive: true });
+trackEventListener (document, "keydown", onKeyDown, { passive: true });
 
 // content.js (runs on video-gens.com pages)
 
@@ -120,9 +134,10 @@ function postMessageW (message){
     }
 } // end postMessageW
 
-window.addEventListener ("beforeunload", () => {
+trackEventListener (window, "beforeunload", () => {
+    removeAllEventListeners ();
     postMessageW ({ action: "release-tabID" });
-});
+}, {});
 
 // Video Details
 const videoName_xpath = "/html/body/main/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div[3]/div"; // name

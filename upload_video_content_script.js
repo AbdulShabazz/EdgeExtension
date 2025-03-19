@@ -1,4 +1,18 @@
 
+let eventListeners = [];
+
+function trackEventListener (target, event, handler, options) {
+    target.addEventListener (event, handler, options);
+    eventListeners.push ({ target, event, handler, options });
+} // end trackEventListener
+
+function removeAllEventListeners () {
+    for ( const { target, event, handler, options } of eventListeners ) {
+        target.removeEventListener (event, handler, options);
+    }
+    eventListeners.length = 0;
+} // end removeAllEventListeners
+
 let messageQueue = [];
 
 // youtubeContent.js (runs on YouTube upload page)
@@ -43,12 +57,13 @@ function postMessageW (message){
     }
 } // end postMessageW
 
-window.addEventListener ("beforeunload", () => {
+trackEventListener (window, "beforeunload", () => {
+    removeAllEventListeners ();
     postMessageW ({ action: "release-tabID" });
-});
+}, {});
 
 function Init () {
-    document.addEventListener ('keydown', (keyCodeEvent) => {
+    trackEventListener (document, 'keydown', (keyCodeEvent) => {
         if (keyCodeEvent.shiftKey) { // [Shift] Youtube
             const input_field = document.querySelectorAll('div[id=textbox]');
             const msg = messageQueue[0];
@@ -57,9 +72,9 @@ function Init () {
             const iid = setInterval(() => {
                 input_field[0].textContent = videoTitle;
                 input_field[1].textContent = prompt;
-            }, false); // end setInterval            
+            })
         } // end if (keyCodeEvent.shiftKey)
-    }); // end addEventListener
+    }, {});
     postMessageW ({ action: "url-youtube" });
 } // end Init
 

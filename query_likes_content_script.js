@@ -1,4 +1,18 @@
 
+let eventListeners = [];
+
+function trackEventListener (target, event, handler, options) {
+    target.addEventListener (event, handler, options);
+    eventListeners.push ({ target, event, handler, options });
+} // end trackEventListener
+
+function removeAllEventListeners () {
+    for ( const { target, event, handler, options } of eventListeners ) {
+        target.removeEventListener (event, handler, options);
+    }
+    eventListeners.length = 0;
+} // end removeAllEventListeners
+
 // Content script for Microsoft Edge extension
 let port; 
 
@@ -24,9 +38,10 @@ function postMessageW (message){
     }
 } // end postMessageW
 
-window.addEventListener ("beforeunload", () => {
+trackEventListener (window, "beforeunload", () => {
+    removeAllEventListeners ();
     postMessageW ({ action: "release-tabID" });
-});
+}, {});
 
 // Function to handle clicks on elements with data-index
 function dataIndexElementClicked(event) {
@@ -68,7 +83,7 @@ let lastEvent;
 function parseBody () {
     // Query initial elements with data-index
     // Add a click event listener to the document
-    document.addEventListener('click', (event) => {
+    trackEventListener (document, "click", (event) => {
         lastEvent = event;
         // limit execution to once per animation frame
         requestAnimationFrame(() => {
@@ -82,7 +97,7 @@ function parseBody () {
 
 // Run initialization based on document state
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', parseBody);
+    trackEventListener (document, "DOMContentLoaded", parseBody, {});
 } else {
     // If DOM is already loaded
     parseBody();

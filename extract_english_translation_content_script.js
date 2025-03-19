@@ -1,4 +1,18 @@
 
+let eventListeners = [];
+
+function trackEventListener (target, event, handler, options) {
+    target.addEventListener (event, handler, options);
+    eventListeners.push ({ target, event, handler, options });
+} // end trackEventListener
+
+function removeAllEventListeners () {
+    for ( const { target, event, handler, options } of eventListeners ) {
+        target.removeEventListener (event, handler, options);
+    }
+    eventListeners.length = 0;
+} // end removeAllEventListeners
+
 const select_text_translate_xpath = "//*[@id=\"yDmH0d\"]/c-wiz/div/div[2]/c-wiz/div[1]/nav/div[1]/div/button";
 
 // Observes when the element first appears in the DOM
@@ -66,9 +80,10 @@ function postMessageW (message, cache = false){
     }
 } // end postMessageW
 
-window.addEventListener ("beforeunload", () => {
+trackEventListener (window, "beforeunload", () => {
+    removeAllEventListeners ();
     postMessageW ({ action: "release-tabID" });
-});
+}, {});
 
 function getElementByXPath (xpath) {
     let ret = null;
