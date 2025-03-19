@@ -104,4 +104,4 @@ function parseBody () {
     postMessageW ({ action: "translateSiteReady" });
 } // end parseBody
 
-let intID = setInterval(parseBody, false);
+let intID = setInterval(parseBody, 1);
