@@ -1,4 +1,35 @@
 
+const originalSetAttribute = Element.prototype.appendChild;
+
+Element.prototype.setAttribute = function (element) {
+    const matchFound = element.hasAttribute ("data-index");
+    if (matchFound && !element.onclick) {
+        //const element = this;
+        const url = element.querySelectorAll('div > div > div > a')[0]?.href || '';
+        const dataIndexValue = value;  
+        element.onclick = function () {
+            // Send a message to the background script
+            postMessageW ({
+                action: 'DataIndexElementClicked',
+                dataIndex: dataIndexValue,
+                url: url 
+            });
+        } // end onclick
+        return originalSetAttribute.apply(element, arguments);
+    }
+};
+
+const originalRemoveAttribute = Element.prototype.removeChild;
+
+Element.prototype.removeAttribute = function (element) {
+    const matchFound = element.hasAttribute ("data-index")
+    if (matchFound && element.onclick) {
+        //const element = this;
+        element.onclick = null;
+        return originalRemoveAttribute.apply(element, arguments);
+    }
+};
+
 const originalSetAttribute = Element.prototype.setAttribute;
 
 Element.prototype.setAttribute = function (name, value) {
