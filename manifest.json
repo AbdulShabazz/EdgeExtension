@@ -11,7 +11,7 @@
   "host_permissions": [
     "https://sora.com/g/*",
     "https://sora.com/t/",
-    "https://sora.com/explore/recent/*",
+    "https://sora.com/explore/*",
     "https://translate.google.com/*",
     "https://*.youtube.com/*"
   ],
@@ -25,7 +25,7 @@
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://sora.com/explore/recent/*"],
+      "matches": ["https://sora.com/explore/*"],
       "js": ["query_likes_content_script.js"],
       "run_at": "document_idle"
     },
