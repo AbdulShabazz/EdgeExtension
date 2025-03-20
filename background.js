@@ -30,11 +30,9 @@ function openTab (url, setActiveTab = false) {
     });
 } // end openTab
 
-function monitorTabs() {
-    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (activeTabs) => {        
-        activeTabId = activeTabs.length > 0 ? activeTabs[0].id : null;
-    });
-} // end monitorTabs
+chrome.tabs.onActivated.addListener ((activeInfo) => {
+    activeTabId = activeInfo.tabId;
+});
 
 function preEvaluateVideo () {
     //const dataIndex = msg.element.getAttribute('data-index');
@@ -155,6 +153,7 @@ chrome.runtime.onConnect.addListener ((port) => {
             switch (message.action) {
                 case 'DataIndexElementClicked':
                     InprocessQueue.push (message);
+                    preEvaluateVideo ();
                     break;
 
                 case 'videoFound':
@@ -252,12 +251,6 @@ chrome.runtime.onConnect.addListener ((port) => {
                     break;
 
             } // end switch (message.action)
-
-            // Periodically check for new videos (small overhead)
-            setInterval(preEvaluateVideo, 1);
-
-            // Periodically document the current active tab (small overhead)
-            setInterval(monitorTabs, 1);
         }
         catch (e) {
           

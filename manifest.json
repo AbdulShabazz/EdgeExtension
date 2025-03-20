@@ -6,7 +6,8 @@
   "permissions": [
     "downloads",
     "alarms",
-    "tabs"
+    "tabs",
+    "activeTab"
   ],
   "host_permissions": [
     "https://sora.com/g/*",
