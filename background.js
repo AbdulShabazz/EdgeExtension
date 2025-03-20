@@ -206,18 +206,19 @@ chrome.runtime.onConnect.addListener ((port) => {
                     SYMP: there is a strange bug where after pressing SHIFT, you have to mouse over the google translate tab
                         to open the Youtube upload window.
                     SOLU: ?? ??
-                    */                
+                    */
+                   const hasFocus = true;
                     chrome.tabs.query({ url: urlSearch }, function(tabs) {
                         if (tabs.length === 0) {
                             console.warn('No open youtube tabs found. Opening a new one.');
-                            openTab (url, true); // open tab in the f/g
+                            openTab (url, hasFocus); // open tab in the f/g
                         } else {
                             // Use the first translate tab found
                             let translateTab = tabs[0];
                             // Navigate it to the translate page (if not already there)
                             chrome.tabs.update(
                                 translateTab.id, 
-                                { url: url, active: true }, 
+                                { url: url, active: hasFocus}, 
                                 function (updatedTab) {
                                     console.log('Updating existing Youtube tab...');
                                 }
