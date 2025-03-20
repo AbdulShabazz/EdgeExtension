@@ -267,7 +267,7 @@ chrome.runtime.onConnect.addListener ((port) => {
     port.onDisconnect.addListener (() => {
         console.info ('background.js connection to background service worker port, disconnected. Reconnecting...')
         port = chrome.runtime.connect({ name: "service-worker" });
-    }, 10); // end port.onDisconnect
+    }); // end port.onDisconnect
 }); // end chrome.runtime.onConnect
 
 // Helper function to message the YouTube content script once the upload page is loaded.
