@@ -1,4 +1,27 @@
 
+const originalOnclick = Element.prototype.onclick;
+
+Element.prototype.onclick = function () {
+    const ref = this;
+    if (ref.hasAttribute ('data-index')) {
+        const url = ref.querySelectorAll('div > div > div > a')[0]?.href || '';
+        const dataIndexValue = ref.getAttribute('data-index');       
+        try {
+            // Send a message to the background script
+            postMessageW ({
+                action: 'DataIndexElementClicked',
+                dataIndex: dataIndexValue,
+                url: url 
+            });
+        }
+        catch (e) {
+            console.info ("warning: Extension context invalidated before a value could be returned for 'DataIndexElementClicked' event.")
+        }
+    }
+    ref.prototype.call (ref);
+};
+
+
 const originalSetAttribute = Element.prototype.appendChild;
 
 Element.prototype.setAttribute = function (element) {
