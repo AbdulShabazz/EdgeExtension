@@ -84,7 +84,8 @@ function connectPort(MSG) {
                 // Check if port is connected before sending message
                 if (port && !chrome.runtime.lastError) {
                     try {
-                        const newVideoTitle = document.querySelectorAll('div[class="truncate"]')[1];
+                        const nodes = document.querySelectorAll('div[class="truncate"]');
+                        const newVideoTitle = nodes[1] || nodes[0]; // add fallback;
                         message = MSG || message; // connection reset ?
                         message.action = "openTranslationTab";
                         message.videoTitle = `OpenAI Sora - ${newVideoTitle.textContent}`;
