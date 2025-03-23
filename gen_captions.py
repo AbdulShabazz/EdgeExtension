@@ -1,20 +1,26 @@
 import re
 from datetime import datetime, timedelta
 
-def log_to_youtube_captions(log_file_path, output_file_path):
+def log_to_srt_captions(log_file_path, output_file_path):
     """
-    Convert a log file with video titles and durations to a YouTube time-stamped caption file.
+    Convert a log file with video titles and durations to a YouTube SRT caption file.
     
     Format of log file:
     filename.mp4, duration
     
-    Format of output file:
-    00:00:00 Video Title 1
-    00:00:05 Video Title 2
+    Format of output SRT file:
+    1
+    00:00:00,000 --> 00:00:05,000
+    Video Title 1
+    
+    2
+    00:00:05,000 --> 00:00:10,000
+    Video Title 2
     ...
     """
-    captions = []
+    srt_entries = []
     current_time = timedelta(seconds=0)
+    entry_number = 1
     
     # Read the log file
     with open(log_file_path, 'r') as log_file:
@@ -56,33 +62,54 @@ def log_to_youtube_captions(log_file_path, output_file_path):
                 print(f"Warning: {e}")
                 continue
             
-            # Format the current time as HH:MM:SS
-            time_str = str(current_time).rjust(8, '0')
-            if time_str.startswith('0:'):  # Ensure HH:MM:SS format
-                time_str = '0' + time_str
+            # Calculate start and end times
+            start_time = current_time
+            end_time = start_time + duration
             
-            # Add the caption
-            captions.append(f"{time_str} {title}")
+            # Format times as SRT format: HH:MM:SS,mmm
+            start_str = format_srt_time(start_time)
+            end_str = format_srt_time(end_time)
             
-            # Increment the current time
-            current_time += duration
+            # Create SRT entry
+            srt_entry = f"{entry_number}\n{start_str} --> {end_str}\n{title}\n"
+            srt_entries.append(srt_entry)
+            
+            # Increment entry number and current time
+            entry_number += 1
+            current_time = end_time
     
     # Write the output file
     with open(output_file_path, 'w') as output_file:
-        output_file.write('\n'.join(captions))
+        output_file.write('\n'.join(srt_entries))
     
-    print(f"Created YouTube caption file: {output_file_path}")
-    print(f"Total videos: {len(captions)}")
+    print(f"Created YouTube SubRip Subtitle (SRT) format caption file: {output_file_path}")
+    print(f"Total entries: {len(srt_entries)}")
     print(f"Total duration: {current_time}")
+
+def format_srt_time(td):
+    """Format a timedelta object as SubRip Subtitle (SRT) time format: HH:MM:SS,mmm"""
+    # Get total seconds
+    total_seconds = int(td.total_seconds())
+    
+    # Extract hours, minutes, seconds
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+    
+    # Get milliseconds (SRT uses commas instead of periods)
+    milliseconds = int((td.total_seconds() - total_seconds) * 1000)
+    
+    # Format as HH:MM:SS,mmm
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d},{milliseconds:03d}"
 
 if __name__ == "__main__":
     import sys
     
     if len(sys.argv) != 3:
-        print("Usage: python -m log_to_captions video_catalog.log video_catalog.captions")
+        print("Usage: py -m gen_captions video_catalog.log video_catalog.captions")
         sys.exit(1)
     
     log_file_path = sys.argv[1]
     output_file_path = sys.argv[2]
     
-    log_to_youtube_captions(log_file_path, output_file_path)
+    log_to_srt_captions(log_file_path, output_file_path)
