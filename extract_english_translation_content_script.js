@@ -39,22 +39,24 @@ try {
             switch (message.action) {
                 case 'generateEnglishPrompt':
                     const inputText = document.querySelector('textarea[aria-label]');
-                    observeDOMForNewElement ('[jsname="W297wb"]', (_) => {
-                        const translatedText_textContent = Array
-                            .from (document.querySelectorAll('span[jsname="W297wb"]'))
-                            .map ((sentence) => sentence.textContent)
-                            .join (' '); // [span.r97qvb, ...]
-                        if (translatedText_textContent != inputText.textContent) {
-                            const langElement = document
-                            .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
-                            .textContent
-                            .replace(/\s*\-\s*Detected$/,'');
-                            message.prompt = `${translatedText_textContent} (Original ${langElement}: ${message.prompt})`;
-                        }
-                        message.prompt = message.prompt || message.videoTitle; // No empty prompts //
-                        message.action = "EnglishPromptCompleted";
-                        postMessageW (message,'cache');
-                    });
+                    if (inputText?.textContent) {
+                        observeDOMForNewElement ('[jsname="W297wb"]', (_) => {
+                            const translatedText_textContent = Array
+                                .from (document.querySelectorAll('span[jsname="W297wb"]'))
+                                .map ((sentence) => sentence.textContent)
+                                .join (' '); // [span.r97qvb, ...]
+                            if (translatedText_textContent != inputText.textContent) {
+                                const langElement = document
+                                .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
+                                .textContent
+                                .replace(/\s*\-\s*Detected$/,'');
+                                message.prompt = `${translatedText_textContent} (Original ${langElement}: ${message.prompt})`;
+                            }
+                            message.prompt = message.prompt || message.videoTitle; // No empty prompts //
+                            message.action = "EnglishPromptCompleted";
+                            postMessageW (message,'cache');
+                        });
+                    }
                     break;
             }
         });
