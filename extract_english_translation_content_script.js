@@ -91,41 +91,18 @@ try {
         postMessageW ({ action: "release-tabID" });
     }, {});
 
-    function getElementByXPath (xpath) {
-        let ret = null;
-        const elem = document.evaluate(
-            xpath,
-            document,
-            null,
-            XPathResult.FIRST_ORDERED_NODE_TYPE,
-            null
-        );
-        if (elem.singleNodeValue) {
-            ret = elem.singleNodeValue;
-        }
-        return ret;
-    } // end getElementByXPath
-
-    function getValueFromXPath(xpath) {
-        let ret = '';
-        const result = getElementByXPath(xpath);
-        if (result) {
-            ret = result.textContent.trim();
-        }
-        return ret;
-    } // end getValueFromXPath
-
     function parseBody () {
-        // site ready ? //
-        const textTranslatOption = getValueFromXPath(select_text_translate_xpath);
-        if (textTranslatOption === '')
-            return;
-        clearInterval (intID);
-        // Init bg listener
         postMessageW ({ action: "translateSiteReady" });
     } // end parseBody
 
-    let intID = setInterval(parseBody, 1);
+    // Run initialization based on document state
+    if (document.readyState != 'complete') {
+        trackEventListener (document, "DOMContentLoaded", parseBody, {});
+    } else {
+        // If DOM is already loaded
+        parseBody();
+    } // end if (document.readyState === 'loading')
+
 } catch (e) {
     //console.info (`An error occured ${JSON.stringify(e,' ',2)}`);
 }
