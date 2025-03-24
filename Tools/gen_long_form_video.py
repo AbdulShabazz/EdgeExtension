@@ -44,7 +44,7 @@ def standardize_videos(videos, output_dir, resolution, width, height):
             '-i', video,
             '-vf', f'scale={width}:{height}:force_original_aspect_ratio=decrease,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2',
             '-c:v', 'libx264',
-            '-crf', '0',  # Quality setting (lower is better)
+            '-crf', '10',  # Quality setting (0 is best; 10 is best for Youtube)
             '-preset', 'veryslow',  # Encoding speed/quality balance
             '-c:a', 'aac',
             '-b:a', '320k',
