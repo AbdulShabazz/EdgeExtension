@@ -31,29 +31,14 @@ function observeDOMForNewElement(selector, callback) {
 let port;
 let MSG;
 
-let inputText = document.querySelector('textarea[aria-label]');
-inputText.onpaste = function (event) {
-    if (MSG) { // Hopefully? cached msg
-        const msg = MSG;
-        const clipboardData = event.clipboardData || window.clipboardData;
-        const pastedData = clipboardData.getData('text/plain');
-        const iid = setTimeout(() => {
-            clearTimeout (iid);
-            msg.action ='generateEnglishPrompt';
-            msg.prompt = pastedData;
-            port.postMessage (msg);
-        }, 1000);
-    }
-}; 
-
 function connectPort (){
     port = chrome.runtime.connect ({ name: "google-translate" });
 
     port.onMessage.addListener((message, sender, sendResponse) => {
-        message = MSG = message || MSG; // message cached ?
+        message = MSG || message; // message cached ?
         switch (message.action) {
             case 'generateEnglishPrompt':
-                //inputText = document.querySelector('textarea[aria-label]');
+                const inputText = document.querySelector('textarea[aria-label]');
                 observeDOMForNewElement ('[jsname="W297wb"]', (_) => {
                     const translatedText_textContent = Array
                         .from (document.querySelectorAll('span[jsname="W297wb"]'))
