@@ -607,3 +607,205 @@ chrome.runtime.onMessage.addListener(async (message) => {
 - This pattern **scales well**, allowing multiple content scripts across multiple tabs to work together with a **single** background script managing logic.
 
 By following this model, your extension remains **modular, efficient, and easy to maintain** while leveraging the **separation of concerns** principle.
+
+# Video Catalog Tools
+
+A collection of `Python` utility scripts for working with video catalogs, including:
+1. `gen_video_catalog.py` - Creates a catalog log file of MP4 videos with their durations
+2. `gen_long_form_video.py` - Combines multiple video files into a single long-form video
+3. `gen_captions.py` - Generates SRT caption files from video catalog logs
+4. `gen_table_of_contents.py` - Creates a YouTube-compatible timestamp table of contents
+
+## Description
+
+`gen_long_form_video.py` takes a catalog file (log file) containing a list of video filenames and combines them in the specified order into a single output video. During this process, it standardizes all videos to a consistent resolution, ensuring a seamless viewing experience.
+
+## Features
+
+- Combines multiple video files in the order specified in a catalog file
+- Standardizes all videos to a consistent resolution
+- Supports common standard resolutions (480p, 720p, 1080p, 4K)
+- Maintains aspect ratio while padding videos to fit the target resolution
+- Uses high-quality encoding settings for the output video
+
+## Requirements
+
+- Python 3.x
+- FFmpeg (must be installed and available in your PATH)
+
+## Installation
+
+1. Ensure Python 3.x is installed on your system
+2. Install FFmpeg if not already installed:
+   - **Ubuntu/Debian**: `sudo apt install ffmpeg`
+   - **macOS**: `brew install ffmpeg`
+   - **Windows**: Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH
+3. Download `gen_long_form_video.py`
+
+## Usage
+
+```bash
+python gen_long_form_video.py [log_file] [options]
+```
+
+### Arguments
+
+- `log_file`: Path to the catalog file listing videos to combine (default: `video_catalog.log`)
+
+### Options
+
+- `--output`, `-o`: Output file name (default: `video_catalog.mp4`)
+- `--resolution`, `-r`: Target resolution shorthand (e.g., 480, 720, 1080, 2160, 4K)
+- `--width`, `-w`: Custom output video width (default: 1920)
+- `--height`, `-ht`: Custom output video height (default: 1080)
+
+### Examples
+
+1. Basic usage with default settings (1080p output):
+   ```bash
+   python gen_long_form_video.py video_catalog.log
+   ```
+
+2. Specify output filename:
+   ```bash
+   python gen_long_form_video.py video_catalog.log --output my_compilation.mp4
+   ```
+
+3. Use a standard resolution:
+   ```bash
+   python gen_long_form_video.py video_catalog.log --resolution 720
+   ```
+
+4. Set custom dimensions:
+   ```bash
+   python gen_long_form_video.py video_catalog.log --width 1280 --height 720
+   ```
+
+## Catalog File Format
+
+The catalog file should list one video filename per line. Each line can optionally include additional information after a comma, but only the part before the comma will be used as the filename.
+
+Example `video_catalog.log`:
+```
+intro.mp4, Introduction segment
+main_content.mp4, Main content
+conclusion.mp4, Conclusion
+```
+
+## How It Works
+
+1. The script reads the catalog file to determine which videos to process and in what order
+2. Each video is standardized to the target resolution while maintaining aspect ratio
+3. Standardized videos are combined into a single output file
+4. Temporary files are automatically cleaned up after processing
+
+## Notes
+
+- Videos are processed in the order they appear in the catalog file
+- All videos must exist in the same directory as the catalog file
+- The script uses a temporary directory for intermediate files
+- For best results, ensure sufficient disk space for processing
+
+# Caption Generator (gen_captions.py)
+
+This companion script converts a video catalog log file to a YouTube-compatible SubRip (SRT) caption file.
+
+## Description
+
+`gen_captions.py` processes the same catalog log files used by `gen_long_form_video.py` and generates caption files that display the title of each video segment at the appropriate timestamp in the combined video.
+
+## Features
+
+- Extracts titles from filenames using regular expressions
+- Automatically calculates caption timing based on video durations
+- Generates SRT format files compatible with YouTube and most video players
+- Provides detailed logs and warnings for any processing issues
+
+## Usage
+
+```bash
+python gen_captions.py video_catalog.log video_catalog.srt
+```
+
+### Arguments
+
+- `video_catalog.log`: Input catalog file with video filenames and durations
+- `video_catalog.srt`: Output SRT caption file
+
+## Catalog File Format for Captions
+
+For caption generation, the catalog file should include both filenames and durations:
+
+```
+filename.mp4, 0:01:30
+another_video.mp4, 0:02:45
+```
+
+The script will attempt to extract titles from filenames with the format:
+`DATE_TIME_TITLE_remix_ID.mp4`
+
+For example, from `20230415_120000_Cool_Video_Title_remix_001.mp4`, it will extract "Cool Video Title".
+
+## How It Works
+
+1. The script reads each line of the catalog file
+2. It extracts the title from the filename using regular expressions
+3. It parses the duration of each video
+4. It calculates the start and end timestamps for each caption
+5. It formats the data in standard SRT format:
+   ```
+   1
+   00:00:00,000 --> 00:01:30,000
+   Cool Video Title
+   
+   2
+   00:01:30,000 --> 00:04:15,000
+   Another Video Title
+   ```
+
+# Table of Contents Generator (gen_table_of_contents.py)
+
+This script creates a YouTube-compatible timestamp table of contents from a video catalog log file, which can be pasted into video descriptions to help viewers navigate through sections.
+
+## Description
+
+`gen_table_of_contents.py` processes the same catalog log files used by the other scripts and generates a formatted list of timestamps and video titles in the format required for YouTube's chapter markers feature.
+
+## Features
+
+- Generates timestamps that are compatible with YouTube's chapter system
+- Extracts titles from video filenames using regular expressions
+- Automatically formats timestamps based on video length (MM:SS or HH:MM:SS)
+- Interactive command-line interface for file selection
+- Option to save the generated table of contents to a file
+
+## Usage
+
+```bash
+python gen_table_of_contents.py
+```
+
+When run, the script will:
+1. Prompt for the path to the log file (defaults to `video_catalog.log`)
+2. Display the generated table of contents
+3. Ask if you want to save it to a file
+4. If yes, prompt for the output file name (defaults to `video_catalog.toc`)
+
+## Output Format
+
+The generated table of contents follows YouTube's timestamp format:
+
+```
+00:00 - First Video Title
+01:30 - Second Video Title
+04:15 - Third Video Title
+```
+
+When added to a YouTube video description, these timestamps become clickable and automatically create chapter markers in the video's progress bar.
+
+## Requirements
+
+- On YouTube, the first timestamp must be 00:00
+- There must be at least three timestamps
+- Each timestamp must be in ascending order
+- Each chapter must be at least 10 seconds long
