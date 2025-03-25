@@ -30,6 +30,7 @@ try {
 
     let port;
     let MSG;
+    let inputText;
 
     function connectPort (){
         port = chrome.runtime.connect ({ name: "google-translate" });
@@ -38,27 +39,24 @@ try {
             message = MSG || message; // message cached ?
             switch (message.action) {
                 case 'generateEnglishPrompt':
-                    observeDOMForNewElement ('textarea[aria-label]', (inputText) => {
-                        //const inputText = document.querySelector('textarea[aria-label]');
-                        if (inputText?.textContent) {
-                            observeDOMForNewElement ('[jsname="W297wb"]', (_) => {
-                                const translatedText_textContent = Array
-                                    .from (document.querySelectorAll('span[jsname="W297wb"]'))
-                                    .map ((sentence) => sentence.textContent)
-                                    .join (' '); // [span.r97qvb, ...]
-                                if (translatedText_textContent != inputText.textContent) {
-                                    const langElement = document
-                                    .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
-                                    .textContent
-                                    .replace(/\s*\-\s*Detected$/,'');
-                                    message.prompt = `${translatedText_textContent} (Original ${langElement}: ${message.prompt})`;
-                                }
-                                message.prompt = message.prompt || message.videoTitle; // No empty prompts //
-                                message.action = "EnglishPromptCompleted";
-                                postMessageW (message,'cache');
-                            });
-                        } // end if (inputText?.textContent) 
-                    });
+                    if (inputText?.textContent) {
+                        observeDOMForNewElement ('[jsname="W297wb"]', (_) => {
+                            const translatedText_textContent = Array
+                                .from (document.querySelectorAll('span[jsname="W297wb"]'))
+                                .map ((sentence) => sentence.textContent)
+                                .join (' '); // [span.r97qvb, ...]
+                            if (translatedText_textContent != inputText.textContent) {
+                                const langElement = document
+                                .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
+                                .textContent
+                                .replace(/\s*\-\s*Detected$/,'');
+                                message.prompt = `${translatedText_textContent} (Original ${langElement}: ${message.prompt})`;
+                            }
+                            message.prompt = message.prompt || message.videoTitle; // No empty prompts //
+                            message.action = "EnglishPromptCompleted";
+                            postMessageW (message,'cache');
+                        });
+                    } // end if (inputText?.textContent) 
                     break;
             }
         });
@@ -85,23 +83,11 @@ try {
             port.postMessage (message);
         }
     } // end postMessageW
-
-    trackEventListener (window, "beforeunload", () => {
-        removeAllEventListeners ();
-        postMessageW ({ action: "release-tabID" });
-    }, {});
-
-    function parseBody () {
+    
+    observeDOMForNewElement ('textarea[aria-label]', (elem) => {
+        inputText = elem;        
         postMessageW ({ action: "translateSiteReady" });
-    } // end parseBody
-
-    // Run initialization based on document state
-    if (document.readyState != 'complete') {
-        trackEventListener (document, "DOMContentLoaded", parseBody, {});
-    } else {
-        // If DOM is already loaded
-        parseBody();
-    } // end if (document.readyState === 'loading')
+    });
 
 } catch (e) {
     //console.info (`An error occured ${JSON.stringify(e,' ',2)}`);
