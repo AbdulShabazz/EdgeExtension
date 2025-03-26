@@ -127,6 +127,7 @@ function postMessageW (message){
 
 trackEventListener (window, "beforeunload", () => {
     removeAllEventListeners ();
+    clearInterval (gID); // clear session keepalive //
     postMessageW ({ action: "release-tabID" });
 }, {});
 
@@ -219,3 +220,8 @@ function parseBody () {
 } // end parseBody
 
 let intID = setInterval(parseBody, 1);
+
+// session keepalive //
+const gID = setInterval(() => {
+    postMessageW ({ action: 'keepalive' });
+}, 25000); // 25s keepalive

@@ -302,6 +302,10 @@ chrome.runtime.onConnect.addListener ((port) => {
                     }
                     break;
 
+                case 'keepalive':
+                    // idle sessionn keepalive //
+                    break;
+
             } // end switch (message.action)
         }
         catch (e) {
