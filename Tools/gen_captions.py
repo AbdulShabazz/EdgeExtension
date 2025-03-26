@@ -76,7 +76,7 @@ def log_to_srt_captions(log_file_path, output_file_path):
             
             # Increment entry number and current time
             entry_number += 1
-            current_time = end_time
+            current_time = start_time + duration
     
     # Write the output file
     with open(output_file_path, 'w') as output_file:
