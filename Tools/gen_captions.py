@@ -64,7 +64,7 @@ def log_to_srt_captions(log_file_path, output_file_path):
             
             # Calculate start and end times
             start_time = current_time
-            end_time = start_time + 2 # duration
+            end_time = start_time + timedelta(seconds=int(2)) # duration
             
             # Format times as SRT format: HH:MM:SS,mmm
             start_str = format_srt_time(start_time)
