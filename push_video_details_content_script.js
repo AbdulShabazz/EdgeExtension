@@ -135,6 +135,7 @@ const videoName_xpath = "/html/body/main/div/div[2]/div/div/div/div[2]/div/div/d
 const resolution_xpath = "/html/body/main/div/div[2]/div/div/div/div[2]/div/div/div/div[2]/div[1]"; // resolution
 const duration_xpath = "/html/body/main/div/div[1]/div/div/div[2]/div/div/div/div[2]/div/div[2]"; // duration
 const prompt_xpath = "/html/body/main/div/div[1]/div/div/div[2]/div/div/div/div[1]/div/div/div/button"; // prompt
+const storyboard_xpath = 'span[class="select-none whitespace-pre-line box-decoration-clone text-transparent"]'; // storyboard(s)
 
 function getElementByXPath (xpath) {
     let ret = null;
@@ -181,8 +182,17 @@ function parseBody () {
     if (resolutionW === '')
         return;
     const durationW = getValueFromXPath(duration_xpath);
-    const promptW = getValueFromXPath(prompt_xpath);
     const videoTitleW = _uuid_ = getValueFromXPath(videoName_xpath);
+    const promptW = (() => {
+        const promptW_0 = Array
+            .from (document.querySelectorAll (storyboard_xpath))
+            .map ((elem) => {
+                return elem.textContent;
+            })
+            .join ('\n');                
+        const promptW_1 = getValueFromXPath(prompt_xpath) 
+        return promptW_0 || promptW_1 || videoTitleW;
+    })();
     clearInterval (intID);
     let ui_buttons = document.querySelectorAll('button'); // (17) //
     let I = ui_buttons.length-1;
