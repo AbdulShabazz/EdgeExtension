@@ -68,13 +68,65 @@ function calcVideoDetails (res,dur) {
     return { status, resolution, duration, remix };
 } // end getResolutionAndDuration
 
+/**
+ * Truncate a string to meet a specific quota of characters.
+ * 
+ * @param {string} inputString - The input string to truncate
+ * @param {number} quota - The maximum number of characters to retain
+ * @returns {string} The truncated string
+ */
+function truncateToQuota(inputString, quota) {
+    // Handle edge cases
+    if (!inputString) {
+        return "";
+    }
+    if (quota <= 0) {
+        return "";
+    }
+    if (inputString.length <= quota) {
+        return inputString;
+    }
+    
+    // Split the string into words
+    const words = inputString.split(" ");
+    
+    // Initialize result
+    const result = [];
+    let currentLength = 0;
+    
+    // Add words until we reach the quota
+    for (const word of words) {
+        // If adding this word would exceed the quota
+        if (currentLength + word.length + (result.length > 0 ? 1 : 0) > quota) {
+            // If we can't add even one more word, return what we have
+            if (result.length === 0) {
+                // Take as many characters as possible from the first word
+                return word.substring(0, quota);
+            }
+            break;
+        }
+        
+        // Add the word
+        result.push(word);
+        currentLength += word.length + (result.length > 1 ? 1 : 0);
+    }
+    
+    // Join the words with spaces
+    return result.join(" ");
+} // end truncateToQuota
+
 function stripSymbols (promptW) {
-    const MAXLENGTH = 2236;
+    const MAXLENGTH = 2230;
     const prompt = promptW
       .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF\u2190-\u21FF\u2500-\u257F\u2B50-\u2BFF\uFE0F]/gu, '')
       .replace(/\s+/g, ' ')
       .substring (0, MAXLENGTH);
-    return `${prompt}${(promptW.length < MAXLENGTH ? '' : ' ...')}`;
+    if (promptW.length < MAXLENGTH)
+        return prompt;
+    else {
+        const prompt_refactored = truncateToQuota (prompt, MAXLENGTH);
+        return `${prompt_refactored} ...`;
+    } // end if (promptW.length ...)
 } // end stripSymbols
 
 function downloadLog (msg) {
