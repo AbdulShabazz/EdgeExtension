@@ -21,7 +21,7 @@ let UI_RESULT_BUTTON = {};
 
 function onKeyDown (keyCodeEvent) {
     if (keyCodeEvent.shiftKey) { // [Shift] Youtube
-        const message = JSON.parse(localStorage.getItem ('MSG_0'));
+        const message = JSON.parse(localStorage.getItem (msg_storage_id));
         if (!message)
             return;
 
@@ -50,23 +50,20 @@ function onKeyDown (keyCodeEvent) {
         const url = "https://www.youtube.com/upload";
         
         // Check if port is connected before sending message
-        if (port && !chrome.runtime.lastError) {
-            try {
-                const nodes = document.querySelectorAll('div[class="truncate"]');
-                const newVideoTitle = nodes[1] || nodes[0]; // add fallback;
-                message.action = "openTranslationTab";
-                message.videoTitle = `OpenAI Sora - ${newVideoTitle.textContent}`;
-                message.url = url;
-                message.urlSearch = urlSearch;
+        try {
+            const nodes = document.querySelectorAll('div[class="truncate"]');
+            const newVideoTitle = nodes[1] || nodes[0]; // add fallback;
+            message.action = "openTranslationTab";
+            message.videoTitle = `OpenAI Sora - ${newVideoTitle.textContent}`;
+            message.url = url;
+            message.urlSearch = urlSearch;
+            postMessageW(message);
+        } catch (err) {
+            console.error(err);
+            // Attempt to reconnect
+            connectPort();
+            if (!chrome.runtime.lastError)
                 postMessageW(message);
-            } catch (err) {
-                console.error(err);
-                // Attempt to reconnect
-                connectPort();
-            }
-        } else {
-            console.log("Port disconnected, reconnecting before sending message");
-            connectPort(message);
         }
     }
 } // end onKeyDown
@@ -77,6 +74,8 @@ trackEventListener (document, "keydown", onKeyDown, { passive: true });
 
 // Store the port reference
 let port;
+let msg_uuid;
+let msg_storage_id;
 
 // Function to establish connection
 function connectPort(MSG) {
@@ -93,8 +92,10 @@ function connectPort(MSG) {
     port.onMessage.addListener((message, sender, sendResponse) => {
         switch (message.action) {
             case 'doRemix':
+                msg_uuid = message.uuid;
+                msg_storage_id = `MSG_${msg_uuid}`;
                 UI_BUTTON['remix'].click();
-                localStorage.setItem ('MSG_0',JSON.stringify(message).toString ());
+                localStorage.setItem (msg_storage_id,JSON.stringify(message).toString ());
                 break;
 
         case 'startUpload':
@@ -117,17 +118,19 @@ function connectPort(MSG) {
 connectPort();
 
 function postMessageW (message){
-    if (port)
-        port.postMessage (message);
-    else {
+    try {
+        port.postMessage (message); // unreliable; preserve for message handling (only) //
+    }
+    catch (e) {
         connectPort ();
-        port.postMessage (message);
+        if (!chrome.runtime.lastError)
+            port.postMessage (message);
     }
 } // end postMessageW
 
 trackEventListener (window, "beforeunload", () => {
     removeAllEventListeners ();
-    clearInterval (gID); // clear session keepalive //
+    localStorage.removeItem (msg_storage_id);
     postMessageW ({ action: "release-tabID" });
 }, {});
 
@@ -220,8 +223,3 @@ function parseBody () {
 } // end parseBody
 
 let intID = setInterval(parseBody, 1);
-
-// session keepalive //
-const gID = setInterval(() => {
-    postMessageW ({ action: 'keepalive' });
-}, 25000); // 25s keepalive

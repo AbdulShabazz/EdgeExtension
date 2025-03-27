@@ -8,7 +8,7 @@ let activeTabId = null;
 let InprocessQueue = [];
 let totalLikesInt64 = new Set ();
 
-chrome.alarms.create("bg-keepAlive", { periodInMinutes: 0.5 });
+chrome.alarms.create("bg-keepAlive", { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener ((alarm) => { console.info ("keep alive (background.js)")});
 
 function generateVideo (details) {
@@ -211,14 +211,14 @@ chrome.runtime.onConnect.addListener ((port) => {
                 case 'videoFound':
                     // cache workload //
                     if (activeTabId){
-                        buffer[activeTabId] = message;
+                        //buffer[activeTabId] = message;
                         message.action = 'doRemix';
                         activePorts['video-details'].postMessage(message);
                     }
                     break;
 
                 case 'openTranslationTab':
-                    const msg = buffer[activeTabId];
+                    const msg = message; //buffer[activeTabId];
                     msg.prompt = stripSymbols(msg.prompt);
                     msg.action = 'generateEnglishPrompt';
                     msg.url = message.url;
