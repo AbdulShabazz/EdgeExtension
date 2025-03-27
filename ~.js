@@ -1,5 +1,16 @@
 
 
+trackEventListener (window, "beforeunload", () => {
+    removeAllEventListeners ();
+    clearInterval (gID); // clear session keepalive //
+    postMessageW ({ action: "release-tabID" });
+}, {});
+
+// session keepalive //
+const gID = setInterval(() => {
+    postMessageW ({ action: 'keepalive' });
+}, 25000); // 25s keepalive
+
 function onKeyDown (keyCodeEvent) {
     if (keyCodeEvent.shiftKey) { // [Shift] Youtube
         const message = JSON.parse(localStorage.getItem ('MSG_0'));
