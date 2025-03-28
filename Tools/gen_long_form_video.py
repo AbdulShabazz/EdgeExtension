@@ -81,7 +81,7 @@ def combine_videos(concat_file_path, output_file):
 
 def main():
     parser = argparse.ArgumentParser(description='Combine videos based on a .log file (Default: ./video_catalog.log).')
-    parser.add_argument('log_file', default='video_catalog.log', help='Path to the log file. (Default: ./video_catalog.log) (Example: log_file ./video_catalog.log)')
+    parser.add_argument('--log_file', default='video_catalog.log', help='Path to the log file. (Default: ./video_catalog.log) (Example: log_file ./video_catalog.log)')
     parser.add_argument('--output', '-o', default='video_catalog.mp4', help='Output file name')
     parser.add_argument('--resolution', '-r', type=int, default=1080, help='target (horizontal progressive width) resolution. (Default: 1080 for 1080p) (Example: --resolution 1080)')
     parser.add_argument('--width', '-w', type=int, default=1920, help='Output video width (default: 1920 for 1920p) (Example: --width 1920)')
