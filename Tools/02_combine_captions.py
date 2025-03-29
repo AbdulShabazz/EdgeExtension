@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+r"""
 02_combine_all_captions.py
 
 This script finds all YouTube caption files in the format 'video_catalog(_\d+)*\.captions'
@@ -8,13 +8,14 @@ and combines them in the order they were received, adjusting timestamps accordin
 
 import os
 import re
+import glob
 import itertools
 from datetime import datetime, timedelta
 import argparse
 import sys
 
 def find_caption_files(directory='.'):
-    """
+    r"""
     Find all files matching the pattern 'video_catalog(_\d+)*\.captions' in the given directory.
     
     Args:
@@ -23,13 +24,10 @@ def find_caption_files(directory='.'):
     Returns:
         list: A list of matching filenames
     """
-    pattern = r'video_catalog(?:_\d+)*\.captions'
     
-    # Get all files in the directory
-    all_files = os.listdir(directory)
-    
+    # Get all files in the directory    
     # Filter files matching the pattern
-    caption_files = [f for f in all_files if re.match(pattern, f)]
+    caption_files = glob.glob("*.captions")
     
     return caption_files
 
