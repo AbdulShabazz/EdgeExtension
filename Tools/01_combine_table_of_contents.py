@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+r"""
 02_combine_chapters.py
 
 This script finds all YouTube chapter timestamp files in the format 'video_catalog(_\d+)*\.toc'
@@ -15,7 +15,7 @@ import argparse
 import sys
 
 def find_chapter_files(directory='.'):
-    """
+    r"""
     Find all files matching the pattern 'video_catalog(_\d+)*\.toc' in the given directory.
     
     Args:
@@ -24,13 +24,10 @@ def find_chapter_files(directory='.'):
     Returns:
         list: A list of matching filenames
     """
-    pattern = r'video_catalog(?:_\d+)*\.toc'
     
-    # Get all files in the directory
-    all_files = os.listdir(directory)
-    
+    # Get all files in the directory    
     # Filter files matching the pattern
-    chapter_files = [f for f in all_files if re.match(pattern, f)]
+    chapter_files = glob.glob("*.toc")
     
     return chapter_files
 
@@ -88,7 +85,7 @@ def format_timestamp(seconds):
     
     return f"{hours:02d}:{minutes:02d}:{secs:02d}"
 
-def combine_chapters(files, output_file='combined_chapters.toc'):
+def combine_chapters(files, output_file='combined_toc.toc'):
     """
     Combine chapter content from files in the given order,
     adjusting timestamps to be continuous across files.
@@ -124,7 +121,7 @@ def combine_chapters(files, output_file='combined_chapters.toc'):
                     
                 # Try to parse line as a chapter timestamp entry
                 # Common format: "00:00 Chapter Title" or "00:00:00 Chapter Title"
-                match = re.match(r'^(\d+:\d+(?::\d+)?)[ \t]+(.+)')                
+                match = re.match(r'^(\d+:\d+(?::\d+)?)[ \t\-]+(.+)', line)                
                 
                 if match:
                     timestamp_str, chapter_title = match.groups()
@@ -138,7 +135,7 @@ def combine_chapters(files, output_file='combined_chapters.toc'):
                     last_timestamp = timestamp_seconds
                     
                     # Create adjusted line
-                    adjusted_line = f"{adjusted_timestamp} {chapter_title}"
+                    adjusted_line = f"{adjusted_timestamp} - {chapter_title}"
                     adjusted_lines.append(adjusted_line)
                 else:
                     # Keep non-timestamp lines as is
@@ -173,7 +170,7 @@ def main():
     # Set up argument parser
     parser = argparse.ArgumentParser(description='Combine YouTube chapter timestamp files.')
     parser.add_argument('-d', '--directory', default='./', help='Directory to search for chapter files')
-    parser.add_argument('-o', '--output', default='video_catalog_long.toc', help='Output filename')
+    parser.add_argument('-o', '--output', default='combined_toc.toc', help='Output filename')
     parser.add_argument('-v', '--verbose', action='store_true', help='Show verbose output')
     
     args = parser.parse_args()
