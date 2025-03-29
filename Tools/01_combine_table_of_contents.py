@@ -2,7 +2,7 @@
 """
 02_combine_chapters.py
 
-This script finds all YouTube chapter timestamp files in the format 'video_catalog(_\d+)*\.log'
+This script finds all YouTube chapter timestamp files in the format 'video_catalog(_\d+)*\.toc'
 and combines them in the order they were received.
 """
 
@@ -16,7 +16,7 @@ import sys
 
 def find_chapter_files(directory='.'):
     """
-    Find all files matching the pattern 'video_catalog(_\d+)*\.log' in the given directory.
+    Find all files matching the pattern 'video_catalog(_\d+)*\.toc' in the given directory.
     
     Args:
         directory (str): Directory to search for chapter files
@@ -182,7 +182,7 @@ def main():
     chapter_files = find_chapter_files(args.directory)
     
     if not chapter_files:
-        print("No chapter files found matching the pattern 'video_catalog(_\\d+)*\\.log'")
+        print("No Youtube SRT chapter filenames found matching the pattern 'video_catalog(_\\d+)*\\.toc'")
         return
     
     if args.verbose:
