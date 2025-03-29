@@ -24,7 +24,7 @@ def find_chapter_files(directory='.'):
     Returns:
         list: A list of matching filenames
     """
-    pattern = r'video_catalog(?:_\d+)*\.log'
+    pattern = r'video_catalog(?:_\d+)*\.toc'
     
     # Get all files in the directory
     all_files = os.listdir(directory)
