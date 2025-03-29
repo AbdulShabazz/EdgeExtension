@@ -172,8 +172,8 @@ def main():
     """Main function to execute the script."""
     # Set up argument parser
     parser = argparse.ArgumentParser(description='Combine YouTube chapter timestamp files.')
-    parser.add_argument('-d', '--directory', default='.', help='Directory to search for chapter files')
-    parser.add_argument('-o', '--output', default='combined_chapters.txt', help='Output filename')
+    parser.add_argument('-d', '--directory', default='./', help='Directory to search for chapter files')
+    parser.add_argument('-o', '--output', default='video_catalog_long.toc', help='Output filename')
     parser.add_argument('-v', '--verbose', action='store_true', help='Show verbose output')
     
     args = parser.parse_args()

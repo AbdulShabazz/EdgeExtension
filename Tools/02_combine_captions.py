@@ -189,7 +189,7 @@ def main():
     # Set up argument parser
     parser = argparse.ArgumentParser(description='Combine YouTube caption files.')
     parser.add_argument('-d', '--directory', default='./', help='Directory to search for caption files')
-    parser.add_argument('-o', '--output', default='video_catalog_long.caption', help='Output filename')
+    parser.add_argument('-o', '--output', default='video_catalog_long.captions', help='Output filename')
     parser.add_argument('-v', '--verbose', action='store_true', help='Show verbose output')
     
     args = parser.parse_args()
