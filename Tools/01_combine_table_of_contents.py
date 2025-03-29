@@ -88,7 +88,7 @@ def format_timestamp(seconds):
     
     return f"{hours:02d}:{minutes:02d}:{secs:02d}"
 
-def combine_chapters(files, output_file='combined_chapters.txt'):
+def combine_chapters(files, output_file='combined_chapters.toc'):
     """
     Combine chapter content from files in the given order,
     adjusting timestamps to be continuous across files.
