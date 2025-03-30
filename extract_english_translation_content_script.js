@@ -45,11 +45,12 @@ try {
                                 .from (document.querySelectorAll('span[jsname="W297wb"]'))
                                 .map ((sentence) => sentence.textContent)
                                 .join (' '); // [span.r97qvb, ...]
-                            if (translatedText_textContent != inputText.textContent) {
-                                const langElement = document
+const langElement = document
                                 .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
                                 .textContent
                                 .replace(/\s*\-\s*Detected$/,'');
+                            if ((translatedText_textContent != inputText.textContent) && !(langElement.match (/[Ee]nglish/))){
+                                
                                 message.prompt = `${translatedText_textContent} (Original ${langElement}: ${message.prompt})`;
                             }
                             message.prompt = message.prompt || message.videoTitle; // No empty prompts //
