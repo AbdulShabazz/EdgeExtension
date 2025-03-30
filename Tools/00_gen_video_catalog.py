@@ -74,7 +74,12 @@ def catalog_videos(directory, output_file='video_catalog.log'):
     Catalog all MP4 videos in the given directory and write the results to a log file.
     """
     # Get all MP4 files in the directory
-    mp4_files = glob.glob(os.path.join(directory, '*.mp4')) # + glob.glob(os.path.join(directory, '*.MP4'))
+    files = glob.glob(os.path.join(directory, '*.mp4')) # + glob.glob(os.path.join(directory, '*.MP4'))
+    
+    # Create a list of tuples (filename, creation_time)
+    file_times = [(f, os.path.getctime(f)) for f in files]
+
+    mp4_files = [f for f, _ in sorted(file_times, key=lambda x: x[1], reverse=False)]
     
     with open(output_file, 'w', encoding='utf-8') as log:
         for video_file in mp4_files:

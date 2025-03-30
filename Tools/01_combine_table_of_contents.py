@@ -45,7 +45,7 @@ def sort_chapter_files(files):
     file_times = [(f, os.path.getctime(f)) for f in files]
     
     # Sort by creation time
-    sorted_files = [f for f, _ in sorted(file_times, key=lambda x: x[1])]
+    sorted_files = [f for f, _ in sorted(file_times, key=lambda x: x[1], reverse=False)]
     
     return sorted_files
 
