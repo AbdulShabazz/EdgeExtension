@@ -43,14 +43,13 @@ try {
                         observeDOMForNewElement ('[jsname="W297wb"]', (_) => {
                             const translatedText_textContent = Array
                                 .from (document.querySelectorAll('span[jsname="W297wb"]'))
-                                .map ((sentence) => sentence.textContent)
+                                .map ((sentence) => sentence?.textContent)
                                 .join (' '); // [span.r97qvb, ...]
-const langElement = document
+                            const langElement = document
                                 .querySelector('[class="VfPpkd-jY41G-V67aGc"]')
-                                .textContent
+                                ?.textContent
                                 .replace(/\s*\-\s*Detected$/,'');
-                            if ((translatedText_textContent != inputText.textContent) && !(langElement.match (/[Ee]nglish/))){
-                                
+                            if (langElement && !(langElement.match (/[Ee]nglish/))){                                
                                 message.prompt = `${translatedText_textContent} (Original ${langElement}: ${message.prompt})`;
                             }
                             message.prompt = message.prompt || message.videoTitle; // No empty prompts //
