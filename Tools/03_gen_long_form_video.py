@@ -37,18 +37,23 @@ def standardize_videos(videos, output_dir, resolution, width, height):
     
     for i, video in enumerate(videos):
         output_filename = os.path.join(output_dir, f"standardized_{i}.mp4")
-        
-        # Use ffmpeg to standardize the video resolution
         cmd = [
             'ffmpeg',
+            '-hwaccel', 'cuda',
             '-i', video,
             '-vf', f'scale={width}:{height}:force_original_aspect_ratio=decrease,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2',
-            '-c:v', 'libx264',
-            '-crf', '0',  # Quality setting (0 is best; 10 is best for Youtube)
-            '-preset', 'veryslow',  # Encoding speed/quality balance
+            '-c:v', 'hevc_nvenc',  # Switch to HEVC
+            '-preset', 'p7',
+            '-tune', 'hq',
+            '-rc', 'constqp',
+            '-qp', '0',
+            '-pix_fmt', 'yuv420p',
+            '-color_primaries', 'bt709',
+            '-color_trc', 'bt709',
+            '-colorspace', 'bt709',
             '-c:a', 'aac',
             '-b:a', '320k',
-            '-y',  # Overwrite output files without asking
+            '-y',
             output_filename
         ]
         
