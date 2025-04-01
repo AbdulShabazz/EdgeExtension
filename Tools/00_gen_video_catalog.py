@@ -104,4 +104,4 @@ if __name__ == "__main__":
         catalog_videos(directory, output_file)
     else:
         print("Usage: python video_catalog.py <directory> [output_file]")
-        print("Example: python video_catalog.py ./my_videos videos.log")
+        print("Example: python video_catalog.py ./my_videos video_catalog.log")
