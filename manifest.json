@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "VideoGen YouTube AutoUploader",
   "version": "1.0",
-  "description": "Auto-download videos from video-gens.com and upload to YouTube.",
+  "description": "Auto-download videos from an image or video generation platform and upload to YouTube.",
   "permissions": [
     "downloads",
     "alarms",
