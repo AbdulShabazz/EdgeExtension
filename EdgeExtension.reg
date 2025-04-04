@@ -1,4 +1,4 @@
 Windows Registry Editor Version 5.00
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge]
-"ExtensionInstallForcelist"="1:IDbhbaeffbgjakajahechnaefjelkljfba;https://github.com/AbdulShabazz/EdgeExtension/update_manifest.xml"
+"ExtensionInstallForcelist"="1:IDbhbaeffbgjakajahechnaefjelkljfba;https://github.com/AbdulShabazz/EdgeExtension/releases/download/v6/update_manifest.xml"
