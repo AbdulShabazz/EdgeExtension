@@ -104,8 +104,7 @@ function truncateToQuota(inputString, quota) {
                 return word.substring(0, quota);
             }
             break;
-        }
-        
+        }        
         // Add the word
         result.push(word);
         currentLength += word.length + (result.length > 1 ? 1 : 0);
