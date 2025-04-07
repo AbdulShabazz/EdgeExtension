@@ -29,7 +29,7 @@ def parse_log_file(file_path):
                 
                 # Extract the video title from the filename
                 # Format: YYYYMMDD_HHMM_Title_remix_ID.mp4
-                match = re.match(r'\d{8}_\d{4}_(.+?)_remix_.*\.mp4', filename)
+                match = re.match(r'^\d{8}_\d{4}_(.+)_[^_]+_[^_]+\.mp4', filename)
                 if match:
                     video_title = match.group(1)
                     # Replace underscores with spaces
