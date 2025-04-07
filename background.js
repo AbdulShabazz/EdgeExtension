@@ -207,6 +207,8 @@ chrome.runtime.onConnect.addListener ((port) => {
                 case 'DataIndexElementClicked':
                     InprocessQueue.push (message);
                     preEvaluateVideo ();
+                    let tmp_url = 'https://sora.com/explore/videos'
+                    openTab(tmp_url, true);
                     break;
 
                 case 'videoFound':
@@ -214,7 +216,8 @@ chrome.runtime.onConnect.addListener ((port) => {
                     if (activeTabId){
                         //buffer[activeTabId] = message;
                         message.action = 'doRemix';
-                        activePorts['video-details'].postMessage(message);
+                        activePorts['video-details'].postMessage(message); // remix video
+                        activePorts['recent-videos'].postMessage(message); // new video
                     }
                     break;
 
