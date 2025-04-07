@@ -56,10 +56,10 @@ function connectPort () {
                     choice['storyboard'] = buttonIndex2[0];
                     choice['create-video'] = buttonIndex2[1];
                     */
-                    description.textContent = message.videoTitle;
+                    description.textContent = `${message.videoTitle}. ${message.prompt}`;
                     /*
                     choice['resolution'].click();
-
+                    /*
                     const resolution_button = document.querySelectorAll('div[data-radix-popper-content-wrapper]'); // 3 resolutions
                     resolution['1080p'] = resolution_button[0];
                     resolution['720p'] = resolution_button[1];
