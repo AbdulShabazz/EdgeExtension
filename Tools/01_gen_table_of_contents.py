@@ -36,9 +36,6 @@ def parse_log_file(file_path):
                 else:
                     # Replace underscores with spaces
                     video_title = match.group(1).replace('_', ' ')
-                    video_title = match.group(1)
-                    # Replace underscores with spaces
-                    video_title = video_title.replace('_', ' ')
                     
                     # Parse the duration (format: 0:00:05 or 0:00:10)
                     time_parts = [int(t) for t in duration_str.split(':')]
