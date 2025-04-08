@@ -39,11 +39,12 @@ def log_to_srt_captions(log_file_path, output_file_path):
             
             # Extract title from filename
             # Assuming format: DATE_TIME_TITLE_remix_ID.mp4
-            match = re.match(r'\d+_\d+_(.+?)_remix_', filename)
+            match = re.match(r'\d+_\d+_(.+?)_[\w\d]+\.mp4$', filename)
             if not match:
                 print(f"Warning: Could not extract title from filename: {filename}")
                 title = filename  # Use the whole filename as fallback
             else:
+                # Replace underscores with spaces
                 title = match.group(1).replace('_', ' ')
             
             # Parse duration (format: 0:00:05)
