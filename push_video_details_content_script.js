@@ -48,12 +48,13 @@ function onKeyDown (keyCodeEvent) {
         
         const urlSearch = "*://sora.com/*";
         const url = "https://www.youtube.com/upload";
-
-        const inputPromptW_2 = document.querySelectorAll('button[class="truncate"]')[1];
         
         // Check if port is connected before sending message
         try {
+
+            const input_nodes = document.querySelectorAll('button[class="truncate"]');
             const nodes = document.querySelectorAll('div[class="truncate"]');
+            const inputPromptW_2 = input_nodes[1] || input_nodes[0];
             const newVideoTitle = nodes[1] || nodes[0]; // add fallback;
             message.action = "openTranslationTab";
             message.videoTitle = `OpenAI Sora - ${newVideoTitle.textContent}`;
