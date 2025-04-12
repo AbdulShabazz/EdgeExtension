@@ -83,7 +83,11 @@ let msg_storage_id;
 
 // Function to establish connection
 function connectPort(MSG) {
-    port = chrome.runtime.connect({ name: "video-details" });
+    while (!port){
+        try{
+            port = chrome.runtime.connect({ name: "video-details" });
+        } catch (e) {}
+    }
     
     // Add disconnection listener
     port.onDisconnect.addListener(() => {
