@@ -1,4 +1,15 @@
 
+function portIsValid () {
+    try {
+        // This will throw if context is invalid
+        if (chrome.runtime && chrome.runtime.id && !chrome.runtime.lastError)
+            return true;
+        else
+            return false;
+    } catch (error) {
+        return false;
+    }
+} // end portIsValid
 
 trackEventListener (window, "beforeunload", () => {
     removeAllEventListeners ();

@@ -21,10 +21,7 @@ let UI_RESULT_BUTTON = {};
 
 function onKeyDown (keyCodeEvent) {
     if (keyCodeEvent.shiftKey) { // [Shift] Youtube
-        const message = JSON.parse(localStorage.getItem (msg_storage_id));
-        if (!message)
-            return;
-
+        let message = JSON.parse(localStorage.getItem (msg_storage_id)) || {};
         let ui_buttons = document.querySelectorAll('button'); // (28) //
         let I = ui_buttons.length-1;
 
@@ -51,23 +48,21 @@ function onKeyDown (keyCodeEvent) {
         
         // Check if port is connected before sending message
         try {
-
             const input_nodes = document.querySelectorAll('button[class="truncate"]');
             const nodes = document.querySelectorAll('div[class="truncate"]');
             const inputPromptW_2 = input_nodes[1] || input_nodes[0];
             const newVideoTitle = nodes[1] || nodes[0]; // add fallback;
             message.action = "openTranslationTab";
+            message.uuid = newVideoTitle.textContent; // for compatibility //
             message.videoTitle = `OpenAI Sora - ${newVideoTitle.textContent}`;
             message.prompt = inputPromptW_2?.textContent; // video prompt details are also on this page...
             message.url = url;
             message.urlSearch = urlSearch;
             postMessageW(message);
         } catch (err) {
-            console.error(err);
+            console.warn(err);
             // Attempt to reconnect
-            connectPort();
-            if (!chrome.runtime.lastError)
-                postMessageW(message);
+            postMessageW(message);
         }
     }
 } // end onKeyDown
@@ -80,15 +75,12 @@ trackEventListener (document, "keydown", onKeyDown, { passive: true });
 let port;
 let msg_uuid;
 let msg_storage_id;
+let isConnected = false;
 
 // Function to establish connection
 function connectPort(MSG) {
-    while (!port){
-        try{
-            port = chrome.runtime.connect({ name: "video-details" });
-        } catch (e) {}
-    }
-    
+    port = chrome.runtime.connect({ name: "video-details" });
+
     // Add disconnection listener
     port.onDisconnect.addListener(() => {
         console.log("Port disconnected. Reconnecting...");
@@ -98,6 +90,7 @@ function connectPort(MSG) {
     
     // Add message listener
     port.onMessage.addListener((message, sender, sendResponse) => {
+        message = MSG || message;
         switch (message.action) {
             case 'doRemix':
                 msg_uuid = message.uuid;
@@ -126,14 +119,18 @@ function connectPort(MSG) {
 connectPort();
 
 function postMessageW (message){
-    try {
-        port.postMessage (message); // unreliable; preserve for message handling (only) //
-    }
-    catch (e) {
-        connectPort ();
-        if (!chrome.runtime.lastError)
-            port.postMessage (message);
-    }
+    let isConnected = true;
+    do {
+        try {
+            isConnected = true;
+            port.postMessage (message); // unreliable; preserve for message handling (only) //
+        }
+        catch (e) {
+            isConnected = false;
+            port = null;
+            connectPort ();
+        }
+    } while (!isConnected);
 } // end postMessageW
 
 trackEventListener (window, "beforeunload", () => {

@@ -22,7 +22,12 @@ let port;
 
 // Function to establish connection
 function connectPort() {
-    port = chrome.runtime.connect({ name: "youtube-upload" });
+    
+    while (!port){
+        try{
+            port = chrome.runtime.connect({ name: "youtube-upload" });
+        } catch (e) {}
+    }
     
     // Add disconnection listener
     port.onDisconnect.addListener(() => {
@@ -49,12 +54,18 @@ function connectPort() {
 connectPort();
 
 function postMessageW (message){
-    if (port)
-        port.postMessage (message);
-    else {
-        connectPort ();
-        port.postMessage (message);
-    }
+    let isConnected = true;
+    do {
+        try {
+            isConnected = true;
+            port.postMessage (message); // unreliable; preserve for message handling (only) //
+        }
+        catch (e) {
+            isConnected = false;
+            port = null;
+            connectPort ();
+        }
+    } while (!isConnected);
 } // end postMessageW
 
 trackEventListener (window, "beforeunload", () => {

@@ -56,7 +56,7 @@ function connectPort () {
                     choice['storyboard'] = buttonIndex2[0];
                     choice['create-video'] = buttonIndex2[1];
                     */
-                    description.textContent = `${message.videoTitle}. ${message.prompt}`;
+                    description.textContent = `${message.prompt}`;
                     /*
                     choice['resolution'].click();
                     /*
