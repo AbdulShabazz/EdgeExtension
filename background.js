@@ -209,7 +209,7 @@ chrome.runtime.onConnect.addListener ((port) => {
                     InprocessQueue.push (message);
                     preEvaluateVideo ();
                     let tmp_url = 'https://sora.com/explore/videos'
-                    openTab(tmp_url, true);
+                    //openTab(tmp_url, true);
                     break;
 
                 case 'videoFound':
