@@ -256,7 +256,7 @@ Below is the `query_likes_content_script.js` code:
 
 The message dispatch uses `chrome.runtime.sendMessage` to send a one-time JSON message to the background ([Message passing  |  Chrome Extensions  |  Chrome for Developers](https://developer.chrome.com/docs/extensions/develop/concepts/messaging#:~:text=One)). The background script’s listener (shown earlier) receives this message and proceeds with downloading the video.
 
-The **New_Videos** Branch in this repo relies on a separate video generation tab with the existing prompt to generate new non-remix vidoes.
+The **New_Videos** Branch of this repo does not rely on a separate video generation tab. An existing non-remix prompt should be copied back into the new videos tab's prompt with the desired resolution and video presets et al,and then prompt-translation and upload is automated from the new video tab, using the SHIFT key, after downloading the video.
 
 > **Note:** The content script runs **without user interaction** – as soon as the page loads and the video is detected, it triggers the process. The user doesn’t need to click anything. We restrict this script to `video-gens.com` via the manifest’s `"matches"`, so it will **not run** on other websites. The extraction of resolution/bitrate may need to be adjusted based on the actual page structure of video-gens.com, but the above approach demonstrates how to gather such info from the DOM.
 
