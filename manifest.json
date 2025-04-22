@@ -31,7 +31,7 @@
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://sora.com/g/*", "https://sora.com/t/*"],
+      "matches": ["https://sora.com/non-active/*", "https://sora.com/t/*"],
       "js": ["push_video_details_content_script.js"],
       "run_at": "document_idle"
     },
