@@ -95,7 +95,7 @@ function connectPort(MSG) {
             case 'doRemix':
                 msg_uuid = message.uuid;
                 msg_storage_id = `MSG_${msg_uuid}`;
-                UI_BUTTON['remix'].click();
+                //UI_BUTTON['remix'].click();
                 localStorage.setItem (msg_storage_id,JSON.stringify(message).toString ());
                 break;
 
