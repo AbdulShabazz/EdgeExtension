@@ -26,7 +26,7 @@
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://sora.com/non-active/*"],
+      "matches": ["https://sora.com/explore/*"],
       "js": ["query_likes_content_script.js"],
       "run_at": "document_idle"
     },
