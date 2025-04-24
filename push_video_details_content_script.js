@@ -68,11 +68,6 @@ function onKeyDown (keyCodeEvent) {
 } // end onKeyDown
 
 trackEventListener (document, "keydown", onKeyDown, { passive: true });
-trackEventListener (window, "focus", () => {
-    let message = JSON.parse(localStorage.getItem (msg_storage_id)) || {};    
-    navigator.clipboard.writeText(message.prompt);
-    alert(`Text succesfully copied to clipboard - "${message.prompt}"`);
-}, {});
 
 // content.js (runs on video-gens.com pages)
 
@@ -227,6 +222,12 @@ function parseBody () {
     UI_BUTTON['recut'] = ui_buttons[I-8];
     UI_BUTTON['storyboard'] = ui_buttons[I-9];
     UI_BUTTON['edit'] = ui_buttons[I-10];
+    trackEventListener (window, "focus", () => {
+        let message = JSON.parse(localStorage.getItem (msg_storage_id)) || {};    
+        navigator.clipboard.writeText(message.prompt);
+        if (!clipBoardCopiedToFlag)
+            clipBoardCopiedToFlag = confirm(`Text succesfully copied to clipboard - "${message.prompt}"`);
+    }, {});
     // Init bg listener
     postMessageW ({
         action: 'videoFound',
@@ -239,3 +240,4 @@ function parseBody () {
 } // end parseBody
 
 let intID = setInterval(parseBody, 1);
+let clipBoardCopiedToFlag;
