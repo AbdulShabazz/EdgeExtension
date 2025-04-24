@@ -68,6 +68,11 @@ function onKeyDown (keyCodeEvent) {
 } // end onKeyDown
 
 trackEventListener (document, "keydown", onKeyDown, { passive: true });
+trackEventListener (window, "focus", () => {
+    let message = JSON.parse(localStorage.getItem (msg_storage_id)) || {};    
+    navigator.clipboard.writeText(message.prompt);
+    alert(`Text succesfully copied to clipboard - "${message.prompt}"`);
+}, {});
 
 // content.js (runs on video-gens.com pages)
 
@@ -100,8 +105,8 @@ function connectPort(MSG) {
                 //UI_BUTTON['remix'].click();
                 //const promptW = document.querySelectorAll('textarea[placeholder="Describe changes to this video..."]')[0];
                 //promptW.textContent = message.prompt;
-                navigator.clipboard.writeText(message.prompt);
-                alert(`Text succesfully copied to clipboard - "${message.prompt}"`);
+                //navigator.clipboard.writeText(message.prompt);
+                //alert(`Text succesfully copied to clipboard - "${message.prompt}"`);
                 localStorage.setItem (msg_storage_id,JSON.stringify(message).toString ());
                 break;
 
