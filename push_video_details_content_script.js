@@ -95,10 +95,13 @@ function connectPort(MSG) {
             case 'doRemix':
                 msg_uuid = message.uuid;
                 msg_storage_id = `MSG_${msg_uuid}`;
+                //UI_BUTTON['edit'].click();
+                //const promptW = document.querySelectorAll('textarea[placeholder="Describe your video..."]')[0];
                 //UI_BUTTON['remix'].click();
-                UI_BUTTON['edit'].click();
-                const promptW = document.querySelectorAll('textarea[placeholder="Describe your video..."]')[0];
-                promptW.textContent = message.prompt;
+                //const promptW = document.querySelectorAll('textarea[placeholder="Describe changes to this video..."]')[0];
+                //promptW.textContent = message.prompt;
+                navigator.clipboard.writeText(message.prompt);
+                alert(`Text succesfully copied to clipboard - "${message.prompt}"`);
                 localStorage.setItem (msg_storage_id,JSON.stringify(message).toString ());
                 break;
 
