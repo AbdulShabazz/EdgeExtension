@@ -97,6 +97,8 @@ function connectPort(MSG) {
                 msg_storage_id = `MSG_${msg_uuid}`;
                 //UI_BUTTON['remix'].click();
                 UI_BUTTON['edit'].click();
+                const promptW = document.querySelectorAll('textarea[placeholder="Describe your video..."]')[0];
+                promptW.textContent = message.prompt;
                 localStorage.setItem (msg_storage_id,JSON.stringify(message).toString ());
                 break;
 
