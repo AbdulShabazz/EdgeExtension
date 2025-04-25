@@ -225,8 +225,11 @@ function parseBody () {
     trackEventListener (window, "focus", () => {
         let message = JSON.parse(localStorage.getItem (msg_storage_id)) || {};    
         navigator.clipboard.writeText(message.prompt);
-        if (!clipBoardCopiedToFlag)
-            clipBoardCopiedToFlag = confirm(`Text succesfully copied to clipboard - "${message.prompt}"`);
+        if (!clipBoardPopulatedFlag){
+            let videoTitleElem = getElementByXPath(videoName_xpath);
+            videoTitleElem.title = `Text succesfully copied to clipboard - "${message.prompt}"`;
+            clipBoardPopulatedFlag = true;
+        }
     }, {});
     // Init bg listener
     postMessageW ({
@@ -240,4 +243,4 @@ function parseBody () {
 } // end parseBody
 
 let intID = setInterval(parseBody, 1);
-let clipBoardCopiedToFlag;
+let clipBoardPopulatedFlag;
