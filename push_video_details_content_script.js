@@ -228,7 +228,7 @@ function parseBody () {
         if (!clipBoardPopulatedFlag){
             let videoTitleElem = getElementByXPath(videoName_xpath);
             videoTitleElem.title = `Text succesfully copied to clipboard - "${message.prompt}"`;
-            clipBoardPopulatedFlag = true;
+            ((videoTitleElem.title.length > 9) && (clipBoardPopulatedFlag = true));
         }
     }, {});
     // Init bg listener
