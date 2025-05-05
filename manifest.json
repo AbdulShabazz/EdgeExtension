@@ -10,9 +10,9 @@
     "activeTab"
   ],
   "host_permissions": [
-    "https://sora.com/g/*",
-    "https://sora.com/t/",
-    "https://sora.com/explore/*",
+    "https://sora.chatgpt.com/g/*",
+    "https://sora.chatgpt.com/t/",
+    "https://sora.chatgpt.com/explore/*",
     "https://translate.google.com/*",
     "https://*.youtube.com/*"
   ],
@@ -26,12 +26,12 @@
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://sora.com/non-active/*"],
+      "matches": ["https://sora.chatgpt.com/non-active/*"],
       "js": ["query_likes_content_script.js"],
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://sora.com/g/*", "https://sora.com/t/*"],
+      "matches": ["https://sora.chatgpt.com/g/*", "https://sora.chatgpt.com/t/*"],
       "js": ["push_video_details_content_script.js"],
       "run_at": "document_idle"
     },
