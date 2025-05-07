@@ -23,22 +23,25 @@ function onKeyDown (keyCodeEvent) {
     if (keyCodeEvent.shiftKey) { // [Shift] Youtube
         let message = JSON.parse(localStorage.getItem (msg_storage_id)) || {};
         let ui_buttons = document.querySelectorAll('button'); // (28) //
-        let I = ui_buttons.length-1;
+        //const I = ui_buttons.length-1;
 
-        UI_RESULT_BUTTON['settings'] = ui_buttons[I-0];
-        UI_RESULT_BUTTON['tasks'] = ui_buttons[I-1];
-        UI_RESULT_BUTTON['folder/report/archive'] = ui_buttons[I-2];
-        UI_RESULT_BUTTON['download'] = ui_buttons[I-3];
-        UI_RESULT_BUTTON['share/unpublish'] = ui_buttons[I-4];
-        UI_RESULT_BUTTON['downvote'] = ui_buttons[I-5];
-        UI_RESULT_BUTTON['like'] = ui_buttons[I-6];
-        UI_RESULT_BUTTON['favorite'] = ui_buttons[I-7];
-        UI_RESULT_BUTTON['menu'] = ui_buttons[I-8];
-        UI_RESULT_BUTTON['loop'] = ui_buttons[I-9];
-        UI_RESULT_BUTTON['blend'] = ui_buttons[I-10];
-        UI_RESULT_BUTTON['remix'] = ui_buttons[I-11];
-        UI_RESULT_BUTTON['recut'] = ui_buttons[I-12];
-        UI_RESULT_BUTTON['edit'] = ui_buttons[I-13];
+        UI_RESULT_BUTTON['prompt'] = ui_buttons[0];
+        UI_RESULT_BUTTON['playback'] = ui_buttons[1];
+        UI_RESULT_BUTTON['edit'] = ui_buttons[2];
+        UI_RESULT_BUTTON['story'] = ui_buttons[3];
+        UI_RESULT_BUTTON['recut'] = ui_buttons[4];
+        UI_RESULT_BUTTON['remix'] = ui_buttons[5];
+        UI_RESULT_BUTTON['blend'] = ui_buttons[6];
+        UI_RESULT_BUTTON['loop'] = ui_buttons[7];
+        UI_RESULT_BUTTON['explore'] = ui_buttons[8];
+        UI_RESULT_BUTTON['preset-details'] = ui_buttons[9];
+        UI_RESULT_BUTTON['favorite'] = ui_buttons[10];
+        UI_RESULT_BUTTON['downvote'] = ui_buttons[11];
+        UI_RESULT_BUTTON['unpublish'] = ui_buttons[12];
+        UI_RESULT_BUTTON['download'] = ui_buttons[13];
+        UI_RESULT_BUTTON['add-to-subfolder'] = ui_buttons[14];
+        UI_RESULT_BUTTON['render-queue'] = ui_buttons[15];
+        UI_RESULT_BUTTON['account'] = ui_buttons[16];
 
         // Update favorites
         UI_RESULT_BUTTON['favorite'].click ();
