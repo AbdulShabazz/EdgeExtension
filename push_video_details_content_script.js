@@ -225,11 +225,12 @@ function parseBody () {
     UI_BUTTON['recut'] = ui_buttons[I-8];
     UI_BUTTON['storyboard'] = ui_buttons[I-9];
     UI_BUTTON['edit'] = ui_buttons[I-10];
-    trackEventListener (window, "focus", () => {
+    videoTitleElem = getElementByXPath(videoName_xpath);
+    trackEventListener (videoTitleElem, "mouseover", () => {
         let message = JSON.parse(localStorage.getItem (msg_storage_id)) || {};    
         navigator.clipboard.writeText(message.prompt);
         if (!clipBoardPopulatedFlag){
-            let videoTitleElem = getElementByXPath(videoName_xpath);
+            //let videoTitleElem = getElementByXPath(videoName_xpath);
             videoTitleElem.title = `Text succesfully copied to clipboard - "${message.prompt}"`;
             ((videoTitleElem.title.length > 12) && (clipBoardPopulatedFlag = true));
         }
@@ -245,5 +246,6 @@ function parseBody () {
     });
 } // end parseBody
 
+let videoTitleElem;
 let intID = setInterval(parseBody, 1);
 let clipBoardPopulatedFlag;
